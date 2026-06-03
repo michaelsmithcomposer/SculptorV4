@@ -1,0 +1,113 @@
+#include <Geode/Geode.hpp>
+#include "lib/Utilities.hpp"
+#include "mod/Manager.hpp"
+#include "external/validObjectIDs.hpp"
+
+using namespace geode::prelude;
+
+namespace Sculptor {
+
+	float sinTime(float frequency, float phase, float amplitude) {
+		return sinf(((Manager::get()->time * frequency) - phase) * 2.0f * M_PI) * amplitude;
+	}
+
+	float sign(float a) {
+		return a >= 0 ? 1 : -1;
+	}
+
+	float lerp(float a, float b, float mix) {
+		return a + (b - a) * mix;
+	}
+
+	float inverseLerp(float a, float b, float t) {
+		return (t - a) / (b - a);
+	}
+
+	float clamp(float value, float a, float b) {
+		float min = std::min(a, b);
+		float max = std::max(a, b);
+		return std::clamp(value, min, max);
+	}
+
+	bool isClose(float a, float b, float precision) {
+		return std::fabs(a - b) < precision;
+	}
+
+	bool isClose(CCPoint a, CCPoint b, float precision) {
+		return isClose(a.x, b.x, precision) && isClose(a.y, b.y, precision);
+	}
+
+	bool rangeContains(float start, float end, float value) {
+		float min = std::min(start, end);
+		float max = std::max(start, end);
+		return ((value > min) || isClose(value, min)) && ((value < max) || (isClose(value, max)));
+	}
+
+	int safeModulo(int a, int b) {
+		return (b + (a % b)) % b;
+	}
+
+	int validateID(int ID) {
+		return validObjectIDs.contains(ID) ? ID : 1;
+	}
+
+	CCPoint toEditorSpace(CCPoint point) {
+		return LevelEditorLayer::get()->getChildByID("main-node")->getChildByID("batch-layer")->convertToNodeSpace(point);
+	}
+
+	CCPoint fromEditorSpace(CCPoint point) {
+		return LevelEditorLayer::get()->getChildByID("main-node")->getChildByID("batch-layer")->convertToWorldSpace(point);
+	}
+
+	float roundTo(float value, int places) {
+		double factor = std::pow(10.0, places);
+		return std::round(value * factor) / factor;
+	}
+
+	CCPoint roundTo(CCPoint value, int places) {
+		double factor = std::pow(10.0, places);
+		return ccp(roundTo(value.x, places), roundTo(value.y, places));
+	}
+
+	float noiseXY(CCPoint point) {
+	
+		int x = static_cast<int>(point.x * 10);
+		int y = static_cast<int>(point.y * 10);
+		
+		int h = x * 374761393 + y * 668265263;
+		h = (h ^ (h >> 13)) * 1274126177;
+		h = h ^ (h >> 16);
+	
+		return static_cast<float>(h & 0x7FFFFFFF) / static_cast<float>(0x7FFFFFFF) * 2.0f - 1.0f;
+		
+	}
+
+	float noiseIndex(int i) {		
+		int h = i * 374761393 + i * 668265263;
+		h = (h ^ (h >> 13)) * 1274126177;
+		h = h ^ (h >> 16);
+
+		return static_cast<float>(h & 0x7FFFFFFF) / static_cast<float>(0x7FFFFFFF) * 2.0f - 1.0f;
+	}
+
+	bool ctrl() {
+		return CCKeyboardDispatcher::get()->m_bControlPressed;
+	}
+
+	bool alt() {
+		return CCKeyboardDispatcher::get()->m_bAltPressed;
+	}
+
+	bool shift() {
+		return CCKeyboardDispatcher::get()->m_bShiftPressed;
+	}
+
+	NineSlice* createBase(CCSize size, CCSize padding) {
+		auto base = NineSlice::create("square02b_001.png", { 0, 0, 80, 80 });
+		base->setScale(0.5);
+		base->setColor({ 0, 0, 0 });
+		base->setOpacity(45);
+		base->setContentSize({ (size.width + padding.width) * 2, (size.height + padding.height) * 2 });
+		return base;
+	}
+}
