@@ -3,11 +3,11 @@
 #include <Geode/Geode.hpp>
 #include "mod/Serialization.hpp"
 #include "mod/Property.hpp"
-#include "mod/Layer.hpp"
-#include "mod/Modulator.hpp"
-#include "mod/Form.hpp"
+#include "mod/Form/Layer.hpp"
+#include "mod/Form/Modulator.hpp"
+#include "mod/Form/Form.hpp"
 #include "mod/Manager.hpp"
-#include "mod/VectorEditor.hpp"
+#include "mod/Form/VectorEditor.hpp"
 
 using namespace geode::prelude;
 using namespace Sculptor;
@@ -25,7 +25,7 @@ geode::Result<CCPoint> matjson::Serialize<CCPoint>::fromJson(const matjson::Valu
 //
 
 matjson::Value matjson::Serialize<BezierCurve>::toJson(const BezierCurve& curve) {
-	return matjson::makeObject({ {"points", curve.getPoints() } });
+	return matjson::makeObject({ {"points", curve.points() } });
 }
 
 geode::Result<BezierCurve> matjson::Serialize<BezierCurve>::fromJson(const matjson::Value& value) {
@@ -39,8 +39,6 @@ geode::Result<BezierCurve> matjson::Serialize<BezierCurve>::fromJson(const matjs
 
 matjson::Value matjson::Serialize<Property*>::toJson(Property* const& property) {
 
-	//return matjson::makeObject({});
-
 	auto info = matjson::makeObject({
 		{"label", property->info.label},
 		{"isModulatable", property->info.isModulatable},
@@ -50,11 +48,14 @@ matjson::Value matjson::Serialize<Property*>::toJson(Property* const& property) 
 		{"trailingDigits", property->info.trailingDigits},
 		{"min", property->info.min},
 		{"max", property->info.max}, 
+		{"valuePool", property->info.valuePool},
+		{"poolType", static_cast<int>(property->info.poolType)}
 	});
 
 	std::vector<matjson::Value> modValues;
 	for (const auto& [modulator, amount] : property->getModValues()) {
 		modValues.push_back(matjson::makeObject({
+			{"formID", Manager::get()->getFormID(modulator->form)},
 			{"modulatorID", modulator->form->getModulatorID(modulator)},
 			{"amount", amount}
 		}));
@@ -73,30 +74,35 @@ geode::Result<Property*> matjson::Serialize<Property*>::fromJson(const matjson::
 	GEODE_UNWRAP_INTO(int trailingDigits, value["info"]["trailingDigits"].as<int>());
 	GEODE_UNWRAP_INTO(float min,		  value["info"]["min"].as<float>());
 	GEODE_UNWRAP_INTO(float max,		  value["info"]["max"].as<float>());
+	GEODE_UNWRAP_INTO(std::vector<float> valuePool, value["info"]["valuePool"].as<std::vector<float>>());
+	GEODE_UNWRAP_INTO(int poolType, value["info"]["poolType"].as<int>());
 
 	GEODE_UNWRAP_INTO(float baseValue, value["baseValue"].as<float>());
 
 	std::unordered_map<Modulator*, float> modValues;
 
 	for (const auto& modulator : value["modValues"]) {
-		GEODE_UNWRAP_INTO(int ID, modulator["modulatorID"].as<int>());		
+		GEODE_UNWRAP_INTO(int formID, modulator["formID"].as<int>());
+		GEODE_UNWRAP_INTO(int modulatorID, modulator["modulatorID"].as<int>());		
 		GEODE_UNWRAP_INTO(float amount, modulator["amount"].as<float>());
-		auto form = Manager::get()->forms.back();
+		auto form = Manager::get()->forms[formID];
 		if (form) {
-			modValues[form->modulators[ID]] = amount;
+			modValues[form->modulators[modulatorID]] = amount;
 		}
 		
 	}
 
 	Property* prop = new Property{ {
-		.label = label, 
+		.label = label,
 		.isModulatable = isModulatable,
 		.defaultValue = defaultValue,
 		.filter = static_cast<CommonFilter>(filter),
 		.leadingDigits = leadingDigits,
 		.trailingDigits = trailingDigits,
 		.min = min,
-		.max = max
+		.max = max,
+		.valuePool = valuePool,
+		.poolType = static_cast<PoolType>(poolType)
 	}, baseValue, modValues};
 
 	return geode::Ok(prop);
@@ -106,13 +112,19 @@ geode::Result<Property*> matjson::Serialize<Property*>::fromJson(const matjson::
 
 
 matjson::Value matjson::Serialize<Layer*>::toJson(Layer* const& layer) {
-	std::vector<matjson::Value> properties;
 
-	for (const auto& property : layer->getProperties()) {
+	std::vector<matjson::Value> properties;
+	for (const auto& property : layer->getNamedProperties()) {
 		properties.push_back(matjson::Serialize<Property*>::toJson(property));
 	}
 
-	return matjson::makeObject({ { "label", layer->label }, { "properties", properties } });
+	std::vector<matjson::Value> groupProperties;
+	for (const auto& property : layer->groups) {
+		groupProperties.push_back(matjson::Serialize<Property*>::toJson(property));
+	}
+
+
+	return matjson::makeObject({ { "label", layer->label }, { "properties", properties }, {"groupProperties", groupProperties}});
 }
 
 geode::Result<Layer*> matjson::Serialize<Layer*>::fromJson(const matjson::Value& value) {
@@ -127,6 +139,11 @@ geode::Result<Layer*> matjson::Serialize<Layer*>::fromJson(const matjson::Value&
 			for (const auto& propValue : value["properties"]) {
 				GEODE_UNWRAP_INTO(std::string propLabel, propValue["info"]["label"].as<std::string>());
 				layer->getPropertyByLabel(propLabel).value()->setFromJson(propValue);
+			}
+
+			for (const auto& groupValue : value["groupProperties"]) {
+				auto property = matjson::Serialize<Property*>::fromJson(groupValue).unwrap();
+				layer->groups.push_back(property);
 			}
 
 			break;

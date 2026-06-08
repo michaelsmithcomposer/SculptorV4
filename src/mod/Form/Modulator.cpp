@@ -1,13 +1,28 @@
 #include <Geode/Geode.hpp>
-#include "mod/Modulator.hpp"
+#include "mod/Form/Modulator.hpp"
 #include "lib/ObjectState.hpp"
 #include "mod/Manager.hpp"
-#include "mod/Form.hpp"
-#include "mod/Layer.hpp"
+#include "mod/Form/Form.hpp"
+#include "mod/Form/Layer.hpp"
+#include "lib/Geometry2.hpp"
 
 using namespace geode::prelude;
 
 namespace Sculptor {
+
+	Line ModulationContext::nearestEdge() const {
+		if (edge) {
+			return *edge;
+		}
+		else if (sequence) {
+			CCPoint point = { objectState->x, objectState->y };
+			return nearestLineAndProjection(point, sequence->edges()).first;
+		}
+		else {
+			CCPoint point = { objectState->x, objectState->y };
+			return nearestLineAndProjection(point, sequencesToLines(layer->paths)).first;
+		}
+	}
 
 	std::vector<Modulator*> Modulator::prototypes() {
 		static std::vector<Modulator*> instance = {
@@ -16,6 +31,7 @@ namespace Sculptor {
 			new YModulator,
 			new SineModulator,
 			new NormalModulator,
+			new IndexModulator,
 		};
 		return instance;
 	}
@@ -25,9 +41,8 @@ namespace Sculptor {
 	}
 
 	float NoiseModulator::sample(const ModulationContext& context) {
-		if (context.index) return noiseIndex(*(context.index));
-		if (context.objectState) return noiseXY({ context.objectState->x, context.objectState->y });		
-		return CCRANDOM_MINUS1_1();
+		if (!context.objectState || !context.layer) return CCRANDOM_MINUS1_1();
+		if (context.layer) return noiseIndex(context.layer->objectIndex);				
 	}
 
 	float XModulator::sample(const ModulationContext& context) {
@@ -59,7 +74,12 @@ namespace Sculptor {
 	float NormalModulator::sample(const ModulationContext& context) {
 		if (!context.objectState || !context.layer) return 0;
 		CCPoint point = { context.objectState->x, context.objectState->y };
-		auto normal = sequencesNormalAt(context.layer->paths, point);
-		return atan2(normal.y, normal.x) / PI;
+		CCPoint normal = context.nearestEdge().normal();
+		return atan2(normal.y, normal.x) / PI;	
+	}
+
+	float IndexModulator::sample(const ModulationContext& context) {
+		if (!context.objectState || !context.layer) return 0;
+		return context.layer->objectIndex;
 	}
 }

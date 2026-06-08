@@ -13,13 +13,13 @@ project(SculptorV4 VERSION 1.0.0)
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
 add_library(${PROJECT_NAME} SHARED ${SOURCES} 
     "src/lib/ObjectState.cpp" 
-    "src/mod/Component.cpp" 
-    "src/mod/Modulator.cpp" 
-    "src/mod/Layer.cpp" 
+    "src/mod/Form/Component.cpp" 
+    "src/mod/Form/Modulator.cpp" 
+    "src/mod/Form/Layer.cpp" 
     "src/mod/Manager.cpp" 
     "src/mod/Property.cpp"
     "src/external/clipper.engine.cpp" 
-    "src/external/clipper.triangulation.cpp" "src/lib/Geometry.cpp" "src/lib/UINode.cpp" "src/hooks/EditorUI.cpp" "src/lib/Utilities.cpp" "src/mod/UI.cpp" "src/mod/Form.cpp" "src/mod/VectorEditor.cpp" "src/mod/Serialization.cpp" "src/hooks/EditorPauseLayer.cpp" "src/lib/Grid.cpp" "src/mod/PropertyInput.cpp" "src/mod/ModulatablePropertyInput.cpp" "src/mod/SelectionPopup.cpp" "src/lib/Geometry2.cpp")
+    "src/external/clipper.triangulation.cpp"  "src/lib/UINode.cpp" "src/hooks/EditorUI.cpp" "src/lib/Utilities.cpp" "src/mod/UI/UI.cpp" "src/mod/Form/Form.cpp" "src/mod/Form/VectorEditor.cpp" "src/mod/Serialization.cpp" "src/hooks/EditorPauseLayer.cpp" "src/lib/Grid.cpp" "src/mod/UI/PropertyInput.cpp" "src/mod/UI/ModulatablePropertyInput.cpp" "src/mod/UI/SelectionPopup.cpp" "src/lib/Geometry2.cpp" "src/mod/UI/PoolInput.cpp" "src/mod/Chain.cpp" )
 
 target_include_directories(${PROJECT_NAME} PRIVATE src)
 

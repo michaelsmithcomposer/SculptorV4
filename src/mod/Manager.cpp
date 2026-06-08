@@ -2,12 +2,16 @@
 #include <alphalaneous.level-storage-api/include/LevelStorageAPI.hpp>
 #include <ranges>
 #include "mod/Manager.hpp"
-#include "mod/Layer.hpp"
-#include "mod/Modulator.hpp"
-#include "mod/UI.hpp"
-#include "mod/Form.hpp"
-#include "mod/VectorEditor.hpp"
+#include "external/validObjectIDs.hpp"
+#include "lib/ObjectState.hpp"
+#include "mod/Form/Layer.hpp"
+#include "mod/Form/Modulator.hpp"
+#include "mod/UI/UI.hpp"
+#include "mod/Form/Form.hpp"
+#include "mod/Form/VectorEditor.hpp"
 #include "mod/Serialization.hpp"
+#include "mod/Chain.hpp"
+
 
 using namespace geode::prelude;
 
@@ -37,6 +41,14 @@ namespace Sculptor {
 		log::info("{}", json.dump());
 		alpha::level_storage::setSavedValue(LevelEditorLayer::get(), "manager", json);	
 		
+	}
+
+	void Manager::removeForm(Form* form, bool deleteObjects) {
+		Manager::get()->deselect();
+		form->removeAllLayers(deleteObjects);
+		form->removeAllModulators();
+		std::erase(forms, form);		
+		form->removeFromParent();
 	}
 
 	void Manager::selectForm(Form* form) {

@@ -1,7 +1,7 @@
 #include <Geode/Geode.hpp>
-#include "mod/Component.hpp"
+#include "mod/Form/Component.hpp"
 #include "lib/Utilities.hpp"
-#include "lib/Geometry.hpp"
+#include "lib/Geometry2.hpp"
 
 using namespace geode::prelude;
 
@@ -12,12 +12,15 @@ namespace Sculptor {
 	class Form;
 
 	class Layer : public ComponentBase<Layer> {
-	public:
-
-		Layer();
-		~Layer();
+	public:	
 
 		static std::vector<Layer*> prototypes();
+
+		~Layer() {
+			for (auto property : groups) {
+				delete property;
+			}
+		}
 
 		Form* form;	
 		std::vector<GameObject*> objects;
@@ -28,13 +31,19 @@ namespace Sculptor {
 		Polys decomposition;
 		Triangles triangulation;
 
+		int objectIndex = 0;
+		int objectCount = 0;
+
 		virtual void evaluate() = 0;
 
 		std::vector<Property*> getBaseProperties() override {
 			return { 
-				&x, &y, &hue, &saturation, &value, &ID,
-				&rotation, &rotationX, &rotationY, &scale, &scaleX, &scaleY, 
-				&color,& secondaryColor, &zLayer, &zOrder, &editorLayer
+				&x, &rotation, &color,
+				&y, &rotationX, &secondaryColor,
+				&hue, &rotationY, &zLayer,
+				&saturation, &scale, &zOrder,
+				&value, &scaleX, &editorLayer,
+				&ID, &scaleY
 			};
 		}			
 		
@@ -46,6 +55,10 @@ namespace Sculptor {
 			return props;
 		}
 
+		std::vector<Property*> getNamedProperties() {
+			return ComponentBase<Layer>::getProperties();
+		}
+
 		void updateObjects();
 		void deleteObjects() {
 			for (const auto& obj : objects) {
@@ -53,7 +66,9 @@ namespace Sculptor {
 			}
 			objects.clear();
 		}
-		void buildObject(std::function<ObjectState(const ModulationContext&)> func);		
+		void buildObject(ModulationContext context, std::function<ObjectState(const ModulationContext&)> func);
+
+		std::vector<Property*> groups = {};
 
 	protected:
 
@@ -72,12 +87,12 @@ namespace Sculptor {
 		Property color{ {.label = "Color", .filter = CommonFilter::Uint } };
 		Property secondaryColor{ {.label = "Secondary Color", .filter = CommonFilter::Uint } };
 		Property hue{ {.label = "Hue" } };
-		Property saturation{ {.label = "Saturation", .leadingDigits = 1 } };
-		Property value{ {.label = "Value", .leadingDigits = 1 } };
+		Property saturation{ {.label = "Saturation", .leadingDigits = 1, .trailingDigits = 2 } };
+		Property value{ {.label = "Value", .leadingDigits = 1, .trailingDigits = 2 } };		
 
 		Property pathOffset{ {.label = "Path Offset", .isModulatable = false } };
-
-		std::vector<Property*> groups;	
+		
+		Property colorPool{ {.label = "Color Pool", .filter = CommonFilter::Int, .min = 0, .valuePool = {1}, .poolType = PoolType::Color } };			
 
 		bool needsContext;
 		void updateBounds();
@@ -92,15 +107,16 @@ namespace Sculptor {
 
 		SolidLayer() {
 			label = "Solid";
-			spritePath = "layer_solid.png"_spr;
+			spritePath = "layer_solid.png"_spr;					
 		};
 
 		SolidLayer* clone() override { return new SolidLayer; }
 		void evaluate();
 		std::vector<Property*> getTypeProperties() override {
-			return { &pathOffset };
+			return { &IDPool, &colorPool, &pathOffset };
 		}
 
+		Property IDPool{ {.label = "ID Pool", .filter = CommonFilter::Int, .min = 0, .valuePool = {(float)objectIDs[GDObject::UnitTriangle]}, .poolType = PoolType::ID}};
 		
 	};
 
@@ -115,12 +131,13 @@ namespace Sculptor {
 		OutlineLayer* clone() override { return new OutlineLayer; }
 		void evaluate();
 		std::vector<Property*> getTypeProperties() override {
-			return { &pathOffset, &lineWidth };
+			return { &IDPool, &colorPool, &pathOffset, &lineWidth };
 		}
 
-		/*Property pathOffset{ {.label = "Path Offset", .isModulatable = false } };*/
-		Property lineWidth{ { .label = "Line Width", .defaultValue = 1 } };
-		
+		Property lineWidth{ { .label = "Line Width", .defaultValue = 1 } };		
+
+		Property IDPool{ {.label = "ID Pool", .filter = CommonFilter::Int, .min = 0, .valuePool = {(float)objectIDs[GDObject::Line]}, .poolType = PoolType::ID}};
+	
 	};
 
 	class UniformObjectLayer : public Layer {
@@ -134,13 +151,34 @@ namespace Sculptor {
 		UniformObjectLayer* clone() override { return new UniformObjectLayer; }
 		void evaluate();
 		std::vector<Property*> getTypeProperties() override {
-			return { &pathOffset, &spacing };
-		}
+			return { &IDPool, &colorPool, &pathOffset, &spacing };
+		}	
+		
 
-		//Property pathOffset{ {.label = "Path Offset", .isModulatable = false } };
 		Property spacing{ {.label = "Spacing", .defaultValue = gdUnit, .min = 1.f } };
 
+		Property IDPool{ {.label = "ID Pool", .filter = CommonFilter::Int, .min = 0, .valuePool = {1}, .poolType = PoolType::ID} };
+
 	};
+
+	class ChainLayer : public Layer {
+	public:
+
+		ChainLayer() {
+			label = "Chain";
+			spritePath = "layer_chain.png"_spr;
+		};
+
+		ChainLayer* clone() override { return new ChainLayer; }
+		void evaluate();
+		std::vector<Property*> getTypeProperties() override {
+			return { &IDPool, &colorPool, &pathOffset };
+		}			
+
+		Property IDPool{ {.label = "ID Pool", .filter = CommonFilter::Int, .min = 0, .valuePool = {1}, .poolType = PoolType::ID} };
+
+	};
+
 
 
 

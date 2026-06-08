@@ -35,6 +35,14 @@ namespace Sculptor {
 		}
 	};
 
+	CCSprite* objectSpriteFromID(int ID);
+	CCSprite* objectButtonSpriteFromID(int ID);
+	CCSprite* colorSpriteFromID(int ID);
+
+	void exportSprites();
+
+	std::pair<CCPoint, CCPoint> getSpriteConnections(int ID);
+
 	float sign(float a);
 
 	float sinTime(float frequency, float phase, float amplitude);
@@ -44,6 +52,8 @@ namespace Sculptor {
 	float inverseLerp(float a, float b, float t);
 
 	float clamp(float value, float a, float b);
+
+	float wrap(float value, float min, float max);
 
 	bool isClose(float a, float b, float precision = 0.01f);
 
@@ -94,6 +104,12 @@ namespace Sculptor {
 		Style,
 		Offset,
 		Group,
+	};
+
+	enum class PoolType {
+		None,
+		ID,
+		Color
 	};
 
 	enum class GDObject {

@@ -1,9 +1,10 @@
 #include <Geode/Geode.hpp>
-#include "mod/Form.hpp"
+#include "mod/Form/Form.hpp"
 #include "mod/Manager.hpp"
-#include "mod/Layer.hpp"
-#include "mod/Modulator.hpp"
-#include "mod/VectorEditor.hpp"
+#include "mod/Form/Layer.hpp"
+#include "mod/Form/Modulator.hpp"
+#include "mod/Form/VectorEditor.hpp"
+#include "mod/UI/UI.hpp"
 
 using namespace geode::prelude;
 
@@ -71,32 +72,63 @@ namespace Sculptor {
 		layer->form = this;
 		this->layers.push_back(layer);
 		layer->updateObjects();
+		for (auto& property : layer->getProperties()) {
+			property->setCallback([layer](Property* p) {
+				layer->form->dirty = true;
+			});
+		}
 		return layer;
 	}
 
 	Modulator* Form::registerModulator(Modulator* modulator) {
-		modulator->form = this;
+		modulator->form = this;	
 		this->modulators.push_back(modulator);
 		return modulator;
 	}
 
-	void Form::removeLayer(Layer* layer) {
-		layer->deleteObjects();
+	void Form::removeLayer(Layer* layer, bool deleteObjects) {
+		if (deleteObjects) layer->deleteObjects();
 		std::erase(layers, layer);	
 		if (Manager::get()->selectedLayer == layer) Manager::get()->selectedLayer = nullptr;
 		delete layer;
+		UI::get()->updateUI();		
+	}
+
+	void Form::removeAllLayers(bool deleteObjects) {
+		for (auto& layer : layers) {
+			if (deleteObjects) layer->deleteObjects();			
+			if (Manager::get()->selectedLayer == layer) Manager::get()->selectedLayer = nullptr;
+			delete layer;
+		}		
+		layers.clear();
+		UI::get()->updateUI();
 	}
 
 	void Form::removeModulator(Modulator* modulator) {
 		for (auto& layer : layers) {
 			for (auto& property : layer->getProperties()) {
-				property->getModValues().erase(modulator);
+				property->removeModulator(modulator);
 			}
 		}
 		std::erase(modulators, modulator);
 		if (Manager::get()->selectedModulator == modulator) Manager::get()->selectedModulator = nullptr;
 		delete modulator;
+		UI::get()->updateUI();
 	}	
+
+	void Form::removeAllModulators() {
+		for (auto& modulator : modulators) {
+			for (auto& layer : layers) {
+				for (auto& property : layer->getProperties()) {
+					property->removeModulator(modulator);
+				}
+			}			
+			if (Manager::get()->selectedModulator == modulator) Manager::get()->selectedModulator = nullptr;
+			delete modulator;
+		}
+		modulators.clear();
+		UI::get()->updateUI();
+	}
 
 	Sequences Form::getPaths(float inflate) {
 		if (inflate == 0 && mode == FormMode::Open) return vectorEditor->getPaths();

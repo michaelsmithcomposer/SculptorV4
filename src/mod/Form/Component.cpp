@@ -1,5 +1,5 @@
 #include <Geode/Geode.hpp>
-#include "mod/Component.hpp"
+#include "mod/Form/Component.hpp"
 
 using namespace geode::prelude;
 

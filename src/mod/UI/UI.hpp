@@ -4,7 +4,7 @@
 #include "lib/Utilities.hpp"
 #include <alphalaneous.editortab_api/include/EditorTabAPI.hpp>
 #include "lib/Grid.hpp"
-#include "mod/SelectionPopup.hpp"
+#include "mod/UI/SelectionPopup.hpp"
 
 using namespace geode::prelude;
 
@@ -28,7 +28,7 @@ namespace Sculptor {
 		void setup();
 
 		void createTab();
-		static CCMenu* createComponentButton(CCSprite* sprite, bool selected, CCObject* target, SEL_MenuHandler selectCallback, SEL_MenuHandler deleteCallback, int tag);
+		static CCMenu* createComponentButton(CCSprite* sprite, bool selected, CCObject* target, SEL_MenuHandler selectCallback, SEL_MenuHandler deleteCallback, SEL_MenuHandler copyCallback, int tag);
 		void updateUI();
 
 		void onModeEnter();
@@ -57,6 +57,7 @@ namespace Sculptor {
 		FormSettingsPanel* formSettingsPanel;
 
 		static constexpr CCSize pageSize = { 570, 90 };
+		static constexpr CCSize poolSize = { 370, 50 };
 		static constexpr CCSize elementSize = { 87, 50 };
 		static CCPoint midpoint() {
 			return CCDirector::sharedDirector()->getWinSize() / 2;
@@ -81,12 +82,34 @@ namespace Sculptor {
 		Grid* grid;
 
 		void onModeButton(CCObject* sender);
-		void onReturnButton(CCObject* sender);
-		void onNewClosedFormButton(CCObject* sender);
-		void onNewOpenFormButton(CCObject* sender);
-		void onDeleteFormButton(CCObject* sender);
+		void onReturnButton(CCObject* sender);	
 
 		static constexpr CCSize size = { 250, 50 };
+
+	};
+
+	//
+
+	class FormSettingsPanel : public SculptorNode<FormSettingsPanel> {
+	public:
+
+		void setup();
+		void updateUI();
+
+	private:
+
+		NineSlice* base;
+		Grid* grid;
+
+		SelectionPopup* selectPopup;
+
+		void onNewFormButton(CCObject* sender);		
+		void onDeleteFormButton(CCObject* sender);
+		void onCopyButton(CCObject* sender);
+		void onPasteButton(CCObject* sender);	
+		void onFlattenButton(CCObject* sender);
+
+		static constexpr CCSize size = { 0.04 * UI::pageSize.width, UI::pageSize.height };
 
 	};
 
@@ -101,7 +124,8 @@ namespace Sculptor {
 	private:
 
 		NineSlice* base;
-		Grid* grid;
+		Grid* topGrid;
+		Grid* mainGrid;
 
 		SelectionPopup* selectPopup;
 
@@ -109,7 +133,12 @@ namespace Sculptor {
 		void onDeleteLayerButton(CCObject* sender);
 		void onSelectLayerButton(CCObject* sender);
 
+		void onCopyLayerButton(CCObject* sender);
+		void onPasteLayerButton(CCObject* sender);
+
 		static constexpr CCSize size = { 0.1 * UI::pageSize.width, UI::pageSize.height };
+		static constexpr CCSize topSize = { 0.1 * UI::pageSize.width, 0.2 * UI::pageSize.height };
+		static constexpr CCSize mainSize = { 0.1 * UI::pageSize.width, 0.8 * UI::pageSize.height };
 
 	};
 
@@ -131,6 +160,7 @@ namespace Sculptor {
 		void onSelectTabButton(CCObject* sender);		
 
 		static constexpr CCSize size = { 0.03 * UI::pageSize.width, UI::pageSize.height };
+		inline static std::vector<std::string> spritePaths = { "tab_style.png"_spr, "tab_offset.png"_spr, "tab_group.png"_spr };
 
 	};
 
@@ -150,7 +180,7 @@ namespace Sculptor {
 		void onNewGroupButton(CCObject* sender);
 		void onDeleteGroupButton(CCObject* sender);
 
-		static constexpr CCSize size = { 0.57 * UI::pageSize.width, UI::pageSize.height };
+		static constexpr CCSize size = { 0.5 * UI::pageSize.width, UI::pageSize.height };
 
 	};
 
@@ -166,7 +196,8 @@ namespace Sculptor {
 	private:
 
 		NineSlice* base;
-		Grid* grid;
+		Grid* topGrid;
+		Grid* mainGrid;
 
 		SelectionPopup* selectPopup;
 
@@ -174,7 +205,12 @@ namespace Sculptor {
 		void onDeleteModulatorButton(CCObject* sender);
 		void onSelectModulatorButton(CCObject* sender);
 
+		void onCopyModulatorButton(CCObject* sender);
+		void onPasteModulatorButton(CCObject* sender);
+
 		static constexpr CCSize size = { 0.1 * UI::pageSize.width, UI::pageSize.height };
+		static constexpr CCSize topSize = { 0.1 * UI::pageSize.width, 0.2 * UI::pageSize.height };
+		static constexpr CCSize mainSize = { 0.1 * UI::pageSize.width, 0.8 * UI::pageSize.height };
 
 	};
 
@@ -191,30 +227,13 @@ namespace Sculptor {
 		NineSlice* base;
 		Grid* grid;	
 
-		static constexpr CCSize size = { 0.2 * UI::pageSize.width, UI::pageSize.height };
+		static constexpr CCSize size = { 0.15 * UI::pageSize.width, UI::pageSize.height };
 
 	};
 
 	//
 
-	class FormSettingsPanel : public SculptorNode<FormSettingsPanel> {
-	public:
 
-		void setup();
-		void updateUI();
-
-	private:
-
-		NineSlice* base;
-		Grid* grid;
-
-		void onPathVisibilityToggle(CCObject* sender);
-		void onControlPathVisibilityToggle(CCObject* sender);
-		void onHitboxVisibilityToggle(CCObject* sender);
-
-		static constexpr CCSize size = { 0.1 * UI::pageSize.width, UI::pageSize.height };
-
-	};
 	
 	
 }

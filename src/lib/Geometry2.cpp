@@ -4,7 +4,7 @@
 using namespace geode::prelude;
 using namespace Clipper2Lib;
 
-namespace Geometry {
+namespace Sculptor {
 
 	CCPoint moveTowards(CCPoint point, CCPoint target, float distance) {
 		return point.lerp(target, distance / point.getDistance(target));
@@ -87,7 +87,7 @@ namespace Geometry {
 		return result;
 	}
 
-	const Lines& Sequence::computeEdges() const {
+	Lines Sequence::computeEdges() const {
 		Lines result;
 		for (const auto& [a, b] : _points | std::views::pairwise) {
 			result.push_back(Line(a, b));
@@ -151,15 +151,16 @@ namespace Geometry {
 	}
 	CCPoint Sequence::lerp(float t) const {	
 		int index = 0;
+		float target = t * length();
 		for (auto [i, l] : cumulativeLengths() | std::views::enumerate) {
-			if (length() <= l) {
+			if (target <= l) {
 				index = i;
 				break;
 			}
 		}
 		Line line = Line(at(index), at((index + 1) % size()));
 		float offset = (index == 0) ? 0 : cumulativeLengths().at(index - 1);
-		float line_t = (length() - offset) / line.length();
+		float line_t = (target - offset) / line.length();
 		return line.lerp(line_t);
 	}
 	std::optional<float> Sequence::inverseLerp(const CCPoint& point) const {
@@ -210,10 +211,17 @@ namespace Geometry {
 	CCPoint projectOntoLines(CCPoint point, const Lines& lines) {
 		return nearestLineAndProjection(point, lines).second;
 	}
-	
+	Lines sequencesToLines(const Sequences& sequences) {
+		Lines result;
+		for (const auto& seq : sequences) {
+			result.append_range(seq.edges());
+		}
+		return result;
+	}
+
 	//
 
-	const Lines& Poly::computeEdges() const {
+	Lines Poly::computeEdges() const {
 		Lines result = Sequence::computeEdges();
 		result.push_back(Line(back(), front()));
 		return result;

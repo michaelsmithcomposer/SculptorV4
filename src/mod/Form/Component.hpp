@@ -12,9 +12,7 @@ namespace Sculptor {
 
 		virtual ~Component() = default;
 
-		virtual Component* clone() = 0;
-		/*virtual std::string getLabel() = 0;
-		virtual std::string getSpritePath() = 0;*/
+		virtual Component* clone() = 0;		
 
 		virtual std::vector<Property*> getProperties() = 0;	
 		virtual std::vector<Property*> getBaseProperties() = 0;

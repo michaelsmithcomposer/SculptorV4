@@ -31,7 +31,7 @@ namespace Sculptor {
 		object->setSecondaryColorMode(std::max(secondaryColor, 1));
 		object->m_baseColor->m_hsv.h = hue;
 		object->m_baseColor->m_hsv.s = saturation;
-		object->m_baseColor->m_hsv.v = value;
+		object->m_baseColor->m_hsv.v = value;		
 		object->m_baseColor->m_hsv.absoluteBrightness = absoluteBrightness;
 		object->m_baseColor->m_hsv.absoluteSaturation = absoluteSaturation;
 
@@ -60,7 +60,7 @@ namespace Sculptor {
 			.rotationY = rotationY + other.rotationY,
 			.scale = scale * other.scale,
 			.scaleX = scaleX * other.scaleX,
-			.scaleY = scaleY * other.scaleY,			
+			.scaleY = scaleY * other.scaleY,
 			.flipX = flipX != other.flipX,
 			.flipY = flipY != other.flipY,
 
@@ -72,7 +72,7 @@ namespace Sculptor {
 			.secondaryColor = secondaryColor + other.secondaryColor,
 			.hue = hue + other.hue,
 			.saturation = saturation + other.saturation,
-			.value = value + other.value,
+			.value = value + other.value,			
 			.absoluteBrightness = absoluteBrightness || other.absoluteBrightness,
 			.absoluteSaturation = absoluteSaturation || other.absoluteSaturation,
 
@@ -103,7 +103,7 @@ namespace Sculptor {
 	}
 
 	ObjectState ObjectState::fromLine(const Line& line, float width) {
-		CCPoint position = line.a.lerp(line.b, 0.5);
+		CCPoint position = line.lerp(0.5);
 		return ObjectState{
 			.ID = objectIDs[GDObject::Line],
 			.x = position.x,

@@ -8,7 +8,7 @@
 using namespace geode::prelude;
 using namespace Clipper2Lib;
 
-namespace Geometry {
+namespace Sculptor {
 
 	CCPoint moveTowards(CCPoint point, CCPoint target, float distance);
 	CCPoint toPolar(float radius, float theta);
@@ -54,7 +54,7 @@ namespace Geometry {
 
 		#pragma region Interface	
 		Sequence() = default;	
-		Sequence(Points points) : points(std::move(points)) {}
+		Sequence(Points points) : _points(std::move(points)) {}
 		template <std::ranges::range R>
 			requires (!std::derived_from<std::remove_cvref_t<R>, Sequence>)
 		Sequence(R&& range) : _points(std::ranges::begin(range), std::ranges::end(range)) {}
@@ -94,7 +94,7 @@ namespace Geometry {
 		static Sequence fromPath(PathD path);
 		static Sequence dashed(const Sequence& sequence, float spacing, float width);
 
-		virtual const Lines& computeEdges() const;
+		virtual Lines computeEdges() const;
 
 		const Lines& edges() const;
 		const PathD& path() const;
@@ -137,6 +137,7 @@ namespace Geometry {
 
 	std::pair<Line, CCPoint> nearestLineAndProjection(CCPoint point, const Lines& lines);
 	CCPoint projectOntoLines(CCPoint point, const Lines& lines);
+	Lines sequencesToLines(const Sequences& sequences);
 
 	//
 
@@ -145,7 +146,7 @@ namespace Geometry {
 
 		using Sequence::Sequence;
 
-		const Lines& computeEdges() const override;
+		Lines computeEdges() const override;
 
 		bool contains(CCPoint point) const;
 		Sequence asSequence() const;
@@ -215,24 +216,24 @@ namespace Geometry {
 //
 
 template <>
-struct fmt::formatter<Geometry::Line> {
+struct fmt::formatter<Sculptor::Line> {
 	constexpr auto parse(fmt::format_parse_context& ctx) {
 		return ctx.begin();
 	}
 
-	auto format(const Geometry::Line& line, fmt::format_context& ctx) const {
+	auto format(const Sculptor::Line& line, fmt::format_context& ctx) const {
 		fmt::format_to(ctx.out(), "[{:.4f}, {:.4f} -> {:.4f}, {:.4f}]", line.a().x, line.a().y, line.b().x, line.b().y);
 		return ctx.out();
 	}
 };
 
 template <>
-struct fmt::formatter<Geometry::Sequence> {
+struct fmt::formatter<Sculptor::Sequence> {
 	constexpr auto parse(fmt::format_parse_context& ctx) {
 		return ctx.begin();
 	}
 
-	auto format(const Geometry::Sequence& seq, fmt::format_context& ctx) const {
+	auto format(const Sculptor::Sequence& seq, fmt::format_context& ctx) const {
 		fmt::format_to(ctx.out(), "Sequence[{}]: ", seq.size());
 		for (const auto& p : seq.points()) {
 			fmt::format_to(ctx.out(), "({:.4f}, {:.4f}) ", p.x, p.y);

@@ -1,9 +1,9 @@
 #include <Geode/Geode.hpp>
 #include <alphalaneous.editortab_api/include/EditorTabAPI.hpp>
-#include "mod/UI.hpp"
+#include "mod/UI/UI.hpp"
 #include "mod/Manager.hpp"
-#include "mod/Form.hpp"
-#include "mod/VectorEditor.hpp"
+#include "mod/Form/Form.hpp"
+#include "mod/Form/VectorEditor.hpp"
 
 using namespace geode::prelude;
 using namespace Sculptor;

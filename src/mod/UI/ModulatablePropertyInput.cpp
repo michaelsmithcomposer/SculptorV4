@@ -1,17 +1,19 @@
 #pragma once
 
 #include <Geode/Geode.hpp>"
-#include "mod/ModulatablePropertyInput.hpp"
+#include "mod/UI/ModulatablePropertyInput.hpp"
 #include "mod/Property.hpp"
-#include "mod/PropertyInput.hpp"
+#include "mod/UI/PropertyInput.hpp"
 #include "mod/Manager.hpp"
-#include "mod/Modulator.hpp"
+#include "mod/Form/Modulator.hpp"
 
 using namespace geode::prelude;
 
 namespace Sculptor {
 
     void ModulatablePropertyInput::setup(Property* property, CCSize size) {
+
+        
 
         this->property = property;
 
@@ -57,8 +59,10 @@ namespace Sculptor {
         });
         modEditor = static_cast<PropertyInput*>(modValue->createUI({ size.width / 2, size.height }));
         modEditor->setBaseVisible(false);
-        modEditor->setColor(Manager::get()->selectedModulator->color);
-        modEditor->setHighlightColor({ 255, 255, 255 });
+        if (Manager::get()->selectedModulator) {
+            modEditor->setColor(Manager::get()->selectedModulator->color);
+            modEditor->setHighlightColor({ 255, 255, 255 });
+        }
         node->addChild(modEditor);
 
         node->updateLayout();

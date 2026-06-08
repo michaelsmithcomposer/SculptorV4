@@ -3,6 +3,7 @@
 #include "mod/Serialization.hpp"
 #include "mod/Manager.hpp"
 
+
 using namespace geode::prelude;
 using namespace Sculptor;
 
@@ -13,6 +14,8 @@ struct SculptorLevelEditorLayer : Modify<SculptorLevelEditorLayer, LevelEditorLa
 		
 		Manager* manager = Manager::create();
 		this->addChild(manager);
+
+		
 
 		return true;
 	}	

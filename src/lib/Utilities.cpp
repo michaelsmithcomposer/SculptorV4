@@ -2,10 +2,64 @@
 #include "lib/Utilities.hpp"
 #include "mod/Manager.hpp"
 #include "external/validObjectIDs.hpp"
+#include "External/spriteConnections.h"
 
 using namespace geode::prelude;
 
 namespace Sculptor {
+
+	CCSprite* objectSpriteFromID(int ID) {		
+		return CCSprite::createWithSpriteFrameName(ObjectToolbox::sharedState()->intKeyToFrame(ID));
+	}
+
+	CCSprite* objectButtonSpriteFromID(int ID) {
+		auto objectSprite = CCSprite::createWithSpriteFrameName(ObjectToolbox::sharedState()->intKeyToFrame(ID));
+		return BasedButtonSprite::create(objectSprite, BaseType::Editor, (int)EditorBaseSize::Normal, (int)EditorBaseColor::Gray);
+	}
+
+	CCSprite* colorSpriteFromID(int ID) {
+		auto action = LevelEditorLayer::get()->m_levelSettings->m_effectManager->getColorAction(ID);
+		auto sprite = ColorChannelSprite::create();
+		sprite->updateValues(action);
+		return sprite;
+	}
+
+	void exportSprites() {	
+
+		std::string outDir = "C:/Users/pauld/OneDrive/Desktop/sprites/";
+		std::filesystem::create_directories(outDir);
+
+		for (int id : validObjectIDs) {		
+
+			auto sprite = objectSpriteFromID(id);
+			auto size = sprite->getContentSize();
+			auto rt = CCRenderTexture::create(size.width, size.height);
+			rt->beginWithClear(1, 1, 1, 1);
+			sprite->setColor(ccBLACK);
+			sprite->setPosition(size / 2);			
+			sprite->visit();
+			rt->end();
+
+			auto image = rt->newCCImage(true);
+
+			std::string filePath = outDir + std::to_string(id) + ".png";
+			image->saveToFile(filePath.c_str());
+
+			log::info("saved {} to {}", id, filePath);
+			
+		}
+	}
+
+	std::pair<CCPoint, CCPoint> getSpriteConnections(int ID) {
+		auto sprite = objectSpriteFromID(ID);	
+		auto [a, b] = spriteConnections.at(ID);
+
+		CCPoint localA = { a.x - sprite->getContentWidth() / 2, -a.y + sprite->getContentHeight() / 2 };
+		CCPoint localB = { b.x - sprite->getContentWidth() / 2, -b.y + sprite->getContentHeight() / 2 };
+
+		sprite->release();
+		return std::make_pair(localA, localB);
+	}
 
 	float sinTime(float frequency, float phase, float amplitude) {
 		return sinf(((Manager::get()->time * frequency) - phase) * 2.0f * M_PI) * amplitude;
@@ -29,6 +83,11 @@ namespace Sculptor {
 		return std::clamp(value, min, max);
 	}
 
+	float wrap(float value, float min, float max) {
+		float range = max - min;
+		return min + std::fmod(std::fmod(value - min, range) + range, range);
+	}
+
 	bool isClose(float a, float b, float precision) {
 		return std::fabs(a - b) < precision;
 	}
@@ -48,7 +107,7 @@ namespace Sculptor {
 	}
 
 	int validateID(int ID) {
-		return validObjectIDs.contains(ID) ? ID : 1;
+		return std::ranges::contains(validObjectIDs, ID) ? ID : 1;
 	}
 
 	CCPoint toEditorSpace(CCPoint point) {

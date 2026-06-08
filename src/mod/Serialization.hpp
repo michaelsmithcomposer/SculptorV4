@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Geode/Geode.hpp>
-#include "lib/Geometry.hpp"
+#include "lib/Geometry2.hpp"
 
 using namespace geode::prelude;
 using namespace Sculptor;
@@ -26,6 +26,8 @@ struct matjson::Serialize<BezierCurve> {
     static matjson::Value toJson(const BezierCurve& curve);
     static geode::Result<BezierCurve> fromJson(const matjson::Value& value);   
 };
+
+
 
 template <>
 struct matjson::Serialize<Property*> {

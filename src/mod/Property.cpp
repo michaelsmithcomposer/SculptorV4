@@ -1,9 +1,10 @@
 
 #include <Geode/Geode.hpp>
 #include "mod/Property.hpp"
-#include "mod/Modulator.hpp"
-#include "mod/PropertyInput.hpp"
-#include "mod/ModulatablePropertyInput.hpp"
+#include "mod/Form/Modulator.hpp"
+#include "mod/UI/PropertyInput.hpp"
+#include "mod/UI/ModulatablePropertyInput.hpp"
+#include "mod/UI/PoolInput.hpp"
 #include "mod/Serialization.hpp"
 
 using namespace geode::prelude;
@@ -23,9 +24,18 @@ namespace Sculptor {
 
 		float result = baseValue;
 		for (const auto& [modulator, amount] : modValues) {
-			result += amount * modulator->evaluate(context);
+			if (amount != 0) {
+				result += amount * modulator->evaluate(context);
+			}			
 		}
-		return clamp(result, info.min, info.max);
+		
+		if (info.valuePool.empty()) {
+			return clamp(result, info.min, info.max);
+		}
+		else {
+			int i = (int)std::round(result) % info.valuePool.size();			
+			return info.valuePool[i];
+		}
 	}
 
 	Property::Info Property::resolveInfo(Property::Info& info) {
@@ -37,6 +47,9 @@ namespace Sculptor {
 	}
 
 	CCNode* Property::createUI(CCSize size) {
+		if (!info.valuePool.empty()) {
+			return PoolInput::create(this, size);
+		}
 		if (info.isModulatable) {
 			return ModulatablePropertyInput::create(this, size);
 		}

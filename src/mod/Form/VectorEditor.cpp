@@ -1,8 +1,9 @@
 #include <Geode/Geode.hpp>
-#include "mod/VectorEditor.hpp"
-#include "mod/Form.hpp"
-#include "mod/Modulator.hpp"
+#include "mod/Form/VectorEditor.hpp"
+#include "mod/Form/Form.hpp"
+#include "mod/Form/Modulator.hpp"
 #include "mod/Serialization.hpp"
+#include "mod/Manager.hpp"
 
 using namespace geode::prelude;
 
@@ -62,7 +63,8 @@ namespace Sculptor {
 
 			isBezier = (ctrlProjection.getDistance(mouse) < pathProjection.getDistance(mouse)) || CCKeyboardDispatcher::get()->m_bControlPressed;
 			projection = isBezier ? ctrlProjection : pathProjection;
-			condition =	(mouse.getDistance(projection) < visibilityRadius) && 
+			condition =	(form == Manager::get()->selectedForm &&
+						mouse.getDistance(projection) < visibilityRadius) && 
 						std::ranges::none_of(nodes, [projection](TreeNode* n) { return n->node->getPosition().getDistance(projection) < visibilityRadius; });
 		}
 
@@ -93,7 +95,7 @@ namespace Sculptor {
 			auto path = getControlPaths();
 			for (const auto& seq : path) {
 				if (seq.size() > 2) {					
-					Points dashes = seq.dashed(4, 0.35).getPoints();
+					Points dashes = Sequence::dashed(seq, 4, 0.35).points();
 					drawLines(dashes.data(), dashes.size(), 0.1, { 1.0, 1.0, 1.0, 0.15 });					
 				}
 			}
@@ -101,14 +103,14 @@ namespace Sculptor {
 
 		if (showPath) {
 			for (const auto& poly : getDecomposition(0.1)) {
-				Points points = poly.getPoints();
+				Points points = poly.points();
 				drawPolygon(points.data(), points.size(), { 0.0, 0.0, 0.0, 0.0 }, 0.1, { 1.0, 1.0, 1.0, 0.35 });
 			}
 		}
 
 		if (showHitbox) {
 			for (const auto& poly : getDecomposition(form->mode == FormMode::Open ? 10 : 1)) {				
-				Points dashes = poly.dashed(4, 0.35).getPoints();
+				Points dashes = Sequence::dashed(poly, 4, 0.35).points();
 				drawLines(dashes.data(), dashes.size(), 0.25, { 1.0, 1.0, 1.0, 0.15 });				
 			}
 		}
@@ -177,7 +179,7 @@ namespace Sculptor {
 		PathsD unionPaths;
 
 		if (form->mode == FormMode::Closed) {			
-			unionPaths = InflatePaths(Union({ getPaths().front().asPath() }, FillRule::EvenOdd), inflate, JoinType::Miter, EndType::Polygon);
+			unionPaths = InflatePaths(Union({ getPaths().front().path() }, FillRule::EvenOdd), inflate, JoinType::Miter, EndType::Polygon);
 		}
 		else {
 			if (!(inflate > 0)) return {};	
@@ -185,8 +187,8 @@ namespace Sculptor {
 			unionPaths = Union(InflatePaths({ getSpanningPath() }, inflate, JoinType::Round, EndType::Round, 2, 2, 0.1), FillRule::EvenOdd);
 		}
 
-		for (const auto& path : unionPaths) {
-			result.push_back(Sequence::fromPath(path));
+		for (const auto& path : unionPaths) {			
+			result.push_back(Sequence::fromPath(path).points());
 		}
 
 		return result;
@@ -200,7 +202,7 @@ namespace Sculptor {
 		PathsD triangles;
 
 		if (form->mode == FormMode::Closed) {			
-			Triangulate(InflatePaths(Union({ getPaths().front().asPath() }, FillRule::EvenOdd), inflate, JoinType::Miter, EndType::Polygon), 6, triangles);
+			Triangulate(InflatePaths(Union({ getPaths().front().path() }, FillRule::EvenOdd), inflate, JoinType::Miter, EndType::Polygon), 6, triangles);
 		}
 		else {
 			if (!(inflate > 0)) return {};
@@ -209,7 +211,7 @@ namespace Sculptor {
 		}	
 
 		for (const auto& path : triangles) {
-			Triangle triangle = Sequence::fromPath(path);
+			Triangle triangle{ Sequence::fromPath(path).points() };
 			result.push_back(triangle);
 			if (triangle.area() > 60) {
 				result.push_back(Triangle({ triangle.b(), triangle.c(), triangle.a() }));
@@ -271,7 +273,10 @@ namespace Sculptor {
 		newNode->startDrag();	
 	}
 
-	void VectorEditor::removeTreeNode(TreeNode* treeNode) {				
+	void VectorEditor::removeTreeNode(TreeNode* treeNode) {		
+		if (root == treeNode && form->mode == FormMode::Closed) {
+			root = treeNode->children.front();
+		}
 		treeNode->clearControlNodes();
 		std::erase(treeNode->parent->children, treeNode);
 		std::erase(nodes, treeNode);
@@ -354,7 +359,7 @@ namespace Sculptor {
 
 		for (TreeNode* child : subRoot->children) {
 			
-			PathD curve = child->asBezierCurve().approximation().asPath();
+			PathD curve = child->asBezierCurve().approximation().path();
 			result.append_range(curve);
 				
 			PathD subtree = getSpanningPath(child);
@@ -389,11 +394,13 @@ namespace Sculptor {
 				}
 				else {
 					editor->convertTreeNode(this);
+					editor->form->dirty = true;
 				}
 			}
 		});
 		node->setRightClickCallback([this, editor](auto uiNode, auto position) {
 			if (!this->parent) return;
+			if (editor->root == this && editor->form->mode == FormMode::Open) return;
 			switch (this->getDegree()) {
 			case 1:	editor->removeTreeNode(this); break;
 			case 2:	editor->dissolveTreeNode(this); break;
@@ -428,17 +435,19 @@ namespace Sculptor {
 		auto newNode = UINode::create(position, type);
 		editor->addChild(newNode);
 
-		node->setMoveCallback([this](auto uiNode, auto position) {
+		newNode->setMoveCallback([this](auto uiNode, auto position) {
 			editor->form->dirty = true;
 		});
 		newNode->setClickCallback([this](UINode* uiNode, auto position) {
 			if (alt()) {
 				editor->convertBezierNode(this, uiNode);
+				editor->form->dirty = true;
 			}
 		});
 		newNode->setRightClickCallback([this](UINode* uiNode, auto position) {
 			uiNode->removeFromParent();
 			std::erase(controlNodes, uiNode);
+			editor->form->dirty = true;
 		});	
 		newNode->setMiddleClickCallback([this](auto uiNode, auto position) {
 			if (editor->form->mode == FormMode::Open) {

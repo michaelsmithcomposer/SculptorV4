@@ -10,6 +10,12 @@ namespace Sculptor {
 	class Layer;
 	class Modulator;
 
+	struct Clipboard {
+		std::optional<matjson::Value> form;
+		std::optional<matjson::Value> layer;
+		std::optional<matjson::Value> modulator;
+	};
+
 	class Manager : public SculptorNode<Manager> {
 	public:
 
@@ -27,23 +33,26 @@ namespace Sculptor {
 		Layer* selectedLayer;
 		Modulator* selectedModulator;
 
+		Clipboard clipboard;
+
 		void selectForm(Form* form);
 		void selectLayer(Layer* layer);
 		void selectModulator(Modulator* modulator);
-		void deselect();
-
-		bool shouldSelectObject(GameObject* object);
-
-		CCNode* getBatchLayer() {
-			return LevelEditorLayer::get()->getChildByID("main-node")->getChildByID("batch-layer");
-		}
+		void deselect();	
 
 		Form* registerForm(Form* form) {
 			forms.push_back(form);
 			return form;
 		}
+		void removeForm(Form* form, bool deleteObjects = true);
 		int getFormID(Form* form) const {
 			return std::ranges::find(forms, form) - forms.begin();
+		}
+
+		bool shouldSelectObject(GameObject* object);
+
+		CCNode* getBatchLayer() {
+			return LevelEditorLayer::get()->getChildByID("main-node")->getChildByID("batch-layer");
 		}
 
 		float time = 0.f;

@@ -27,10 +27,10 @@ namespace Sculptor {
 		updateLayout();
 
 		if (direction == Direction::Horizontal) {
-			node->setLayout(ColumnLayout::create()->setGap(0)->setAxisReverse(true)->setAxisAlignment(AxisAlignment::Between));
+			node->setLayout(ColumnLayout::create()->setGap(0)->setAxisReverse(true)->setAxisAlignment(AxisAlignment::Even));
 		}
 		else {
-			node->setLayout(RowLayout::create()->setGap(0)->setAxisAlignment(AxisAlignment::Between));
+			node->setLayout(RowLayout::create()->setGap(0)->setAxisAlignment(AxisAlignment::Even));
 		}
 		for (int i = 0; i < lanes; i++) {
 			auto lane = CCMenu::create();

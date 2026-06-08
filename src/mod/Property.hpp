@@ -1,5 +1,6 @@
 #pragma once
 #include <Geode/Geode.hpp>
+#include "lib/Utilities.hpp"
 
 using namespace geode::prelude;
 
@@ -21,6 +22,9 @@ namespace Sculptor {
 			int trailingDigits = -1;
 			float min = NAN;
 			float max = NAN;
+
+			std::vector<float> valuePool;
+			PoolType poolType = PoolType::None;
 		};
 
 		Property(Info info, std::optional<float> value = std::nullopt, std::optional<std::unordered_map<Modulator*, float>> modValues = std::nullopt) : 
@@ -42,6 +46,9 @@ namespace Sculptor {
 			modValues[modulator] = value;
 			if (onChanged) onChanged(this);
 		};
+		void removeModulator(Modulator* modulator) {
+			modValues.erase(modulator);
+		}
 
 		void setCallback(std::function<void(Property*)> onChanged) { this->onChanged = onChanged; };
 

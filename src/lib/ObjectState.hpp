@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Geode/Geode.hpp>
-#include "Geometry.hpp"
+#include "Geometry2.hpp"
 #include "Utilities.hpp"
 
 using namespace geode::prelude;
@@ -31,7 +31,7 @@ namespace Sculptor {
 		int secondaryColor = 0;
 		float hue = 0;
 		float saturation = 0;
-		float value = 0;
+		float value = 0;		
 		bool absoluteBrightness = true;
 		bool absoluteSaturation = true;
 

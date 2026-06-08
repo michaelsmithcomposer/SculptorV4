@@ -2,7 +2,7 @@
 
 #include <Geode/Geode.hpp>
 #include "lib/Utilities.hpp"
-#include "lib/Geometry.hpp"
+#include "lib/Geometry2.hpp"
 #include "mod/Property.hpp"
 
 
@@ -35,8 +35,10 @@ namespace Sculptor {
 		Layer* registerLayer(Layer* layer);
 		Modulator* registerModulator(Modulator* modulator);
 
-		void removeLayer(Layer* layer);
+		void removeLayer(Layer* layer, bool deleteObjects = true);
+		void removeAllLayers(bool deleteObjects = true);
 		void removeModulator(Modulator* modulator);
+		void removeAllModulators();
 
 		Sequences getPaths(float inflate);
 		Polys getDecomposition(float inflate);

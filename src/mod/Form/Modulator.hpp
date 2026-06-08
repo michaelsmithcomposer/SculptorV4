@@ -1,6 +1,7 @@
 #include <Geode/Geode.hpp>
-#include "mod/Component.hpp"
+#include "mod/Form/Component.hpp"
 #include "lib/Utilities.hpp"
+#include "lib/Geometry2.hpp"
 
 using namespace geode::prelude;
 
@@ -12,7 +13,10 @@ namespace Sculptor {
 	struct ModulationContext {
 		ObjectState* objectState = nullptr;
 		Layer* layer = nullptr;
-		std::optional<int> index = std::nullopt;
+		const Line* edge = nullptr;
+		const Sequence* sequence = nullptr;		
+
+		Line nearestEdge() const;
 	};	
 
 	class Modulator : public ComponentBase<Modulator> {
@@ -74,8 +78,7 @@ namespace Sculptor {
 
 		XModulator() {
 			label = "X";
-			spritePath = "mod_x.png"_spr;
-			contextual = true;
+			spritePath = "mod_x.png"_spr;			
 			color = { 255, 100, 100 };
 		}
 
@@ -90,8 +93,7 @@ namespace Sculptor {
 
 		YModulator() {
 			label = "Y";
-			spritePath = "mod_y.png"_spr;
-			contextual = true;
+			spritePath = "mod_y.png"_spr;			
 			color = { 100, 255, 100 };
 		}
 
@@ -106,8 +108,7 @@ namespace Sculptor {
 
 		SineModulator() {
 			label = "Sine";
-			spritePath = "mod_sine.png"_spr;
-			contextual = true;
+			spritePath = "mod_sine.png"_spr;			
 			color = { 255, 255, 100 };
 		}
 
@@ -130,16 +131,28 @@ namespace Sculptor {
 
 		NormalModulator() {
 			label = "Normal";
-			spritePath = "mod_normal.png"_spr;
-			contextual = true;
+			spritePath = "mod_normal.png"_spr;			
 			color = { 255, 100, 255 };
 		}
 
 		NormalModulator* clone() override { return new NormalModulator; };
 
-		float sample(const ModulationContext& context) override;	
+		float sample(const ModulationContext& context) override;			
 
-		
+	};
+
+	class IndexModulator : public Modulator {
+	public:
+
+		IndexModulator() {
+			label = "Index";
+			spritePath = "mod_index.png"_spr;			
+			color = { 0, 216, 255 };
+		}
+
+		IndexModulator* clone() override { return new IndexModulator; };
+
+		float sample(const ModulationContext& context) override;
 
 	};
 	
