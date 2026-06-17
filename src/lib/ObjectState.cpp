@@ -39,13 +39,13 @@ namespace Sculptor {
 
 		object->resetGroups();
 		for (const auto& groupID : groups) {
-			LevelEditorLayer::get()->addToGroup(object, ID, false);
+			LevelEditorLayer::get()->addToGroup(object, groupID, false);
 		}		
 
 		object->m_updateParents = true;
 		LevelEditorLayer::get()->updateObjectSection(object);
 		LevelEditorLayer::get()->reorderObjectSection(object);
-		LevelEditorLayer::get()->resetToggledGroupsAndObjects();
+		LevelEditorLayer::get()->resetToggledGroupsAndObjects();		
 
 		return object;
 	}
