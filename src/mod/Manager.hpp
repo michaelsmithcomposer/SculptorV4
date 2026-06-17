@@ -10,12 +10,6 @@ namespace Sculptor {
 	class Layer;
 	class Modulator;
 
-	struct Clipboard {
-		std::optional<matjson::Value> form;
-		std::optional<matjson::Value> layer;
-		std::optional<matjson::Value> modulator;
-	};
-
 	class Manager : public SculptorNode<Manager> {
 	public:
 
@@ -25,6 +19,7 @@ namespace Sculptor {
 		bool isActive = true;
 
 		void setup();
+		void reconstruct();
 		void onSave();
 
 		std::vector<Form*> forms;
@@ -33,12 +28,17 @@ namespace Sculptor {
 		Layer* selectedLayer;
 		Modulator* selectedModulator;
 
-		Clipboard clipboard;
+		Form* clipboard;
+		ClipboardState clipboardState;
 
 		void selectForm(Form* form);
 		void selectLayer(Layer* layer);
 		void selectModulator(Modulator* modulator);
 		void deselect();	
+
+		Layer* copyLayerTo(Layer*, Form* target);
+		Modulator* copyModulatorTo(Modulator* modulator, Form* target);
+
 
 		Form* registerForm(Form* form) {
 			forms.push_back(form);

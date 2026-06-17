@@ -5,12 +5,23 @@ using namespace geode::prelude;
 using namespace Clipper2Lib;
 
 namespace Sculptor {
-
+	
+	CCPoint asPoint(PointD point) {
+		return ccp(point.x, point.y);
+	}
 	CCPoint moveTowards(CCPoint point, CCPoint target, float distance) {
 		return point.lerp(target, distance / point.getDistance(target));
 	}
-	CCPoint toPolar(float radius, float theta) {
+	CCPoint fromPolar(float radius, float theta) {
 		return ccp(radius * cos(theta), radius * sin(theta));
+	}
+	PathsD OpenIntersection(PathsD subjects, PathsD clips) {
+		ClipperD clipper;
+		clipper.AddOpenSubject(subjects);
+		clipper.AddClip(clips);
+		PathsD _, result;
+		clipper.Execute(ClipType::Intersection, FillRule::NonZero, _, result);
+		return result;
 	}
 
 	float Line::length() const {
@@ -39,7 +50,7 @@ namespace Sculptor {
 		return std::nullopt;
 	}
 	CCPoint Line::projectionOf(CCPoint point) const {
-		if (_a.x == _b.x) {
+		if (isClose(_a.x, _b.x)) {
 			return ccp(_a.x, Sculptor::clamp(point.y, _a.y, _b.y));
 		}
 		else {
@@ -66,6 +77,10 @@ namespace Sculptor {
 	}
 	bool Line::coincidentWith(const Line& other) const {
 		return (Sculptor::isClose(_a, other.a()) && Sculptor::isClose(_b, other.b())) || (Sculptor::isClose(_a, other.b()) && Sculptor::isClose(_b, other.a()));
+	}
+
+	Line Line::shrunk(float distance) const {
+		return Line(moveTowards(_a, _b, distance), moveTowards(_b, _a, distance));		
 	}
 
 	//
@@ -143,8 +158,19 @@ namespace Sculptor {
 	}
 
 	CCPoint Sequence::normalAt(const CCPoint& point) const {
-		auto [edge, projection] = nearestLineAndProjection(point, edges());
-		return edge.normal();
+		auto indices = edgeIndicesContaining(point);
+		if (!indices.empty()) {
+			CCPoint normal = { 0, 0 };
+			for (const auto& index : indices) {
+				normal += edges().at(index).normal();
+			}			
+			return normal /= indices.size();
+		}
+		else {
+			auto [edge, projection] = nearestLineAndProjection(point, edges());
+			return edge.normal();
+		}
+		
 	}
 	CCPoint Sequence::projectionOf(CCPoint point) const {
 		return projectOntoLines(point, edges());
@@ -316,5 +342,13 @@ namespace Sculptor {
 			maxAngle = std::max(maxAngle, angle);
 		}
 		return maxAngle;
+	}
+
+	//
+
+	Circle Circle::fromBoundingBox(CCRect rect) {
+		CCPoint origin = { rect.getMidX(), rect.getMidY() };
+		float radius = rect.origin.getDistance(origin);
+		return Circle(origin, radius);
 	}
 }

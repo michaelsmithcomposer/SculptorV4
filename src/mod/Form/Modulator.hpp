@@ -34,6 +34,9 @@ namespace Sculptor {
 			return { &depth, &offset, &ramp };
 		}
 
+		bool isEquivalent(Modulator* other);
+		void copyPropertiesTo(Modulator* other);
+
 		float evaluate(const ModulationContext& context) {
 			float value = sample(context);
 

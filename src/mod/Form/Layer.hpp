@@ -68,6 +68,10 @@ namespace Sculptor {
 		}
 		void buildObject(ModulationContext context, std::function<ObjectState(const ModulationContext&)> func);
 
+		std::vector<Modulator*> getUsedModulators();
+		void copyPropertiesTo(Layer* other);
+		Property* addGroupProperty();
+
 		std::vector<Property*> groups = {};
 
 	protected:
@@ -140,6 +144,26 @@ namespace Sculptor {
 	
 	};
 
+	class GlowLayer : public Layer {
+	public:
+
+		GlowLayer() {
+			label = "Glow";
+			spritePath = "layer_glow.png"_spr;
+		};
+
+		GlowLayer* clone() override { return new GlowLayer; }
+		void evaluate();
+		std::vector<Property*> getTypeProperties() override {
+			return { &colorPool, &pathOffset, &glowWidth };
+		}
+
+		Property glowWidth{ {.label = "Glow Width", .defaultValue = 1 } };
+	
+
+	};
+
+
 	class UniformObjectLayer : public Layer {
 	public:
 
@@ -178,6 +202,27 @@ namespace Sculptor {
 		Property IDPool{ {.label = "ID Pool", .filter = CommonFilter::Int, .min = 0, .valuePool = {1}, .poolType = PoolType::ID} };
 
 	};
+
+	class StripLayer : public Layer {
+	public:
+
+		StripLayer() {
+			label = "Strip";
+			spritePath = "layer_strip.png"_spr;
+		};
+
+		StripLayer* clone() override { return new StripLayer; }
+		void evaluate();
+		std::vector<Property*> getTypeProperties() override {
+			return { &IDPool, &colorPool, &stripAngle, &stripScale, &pathOffset };
+		}
+		
+		Property stripAngle{ {.label = "Strip Angle", .isModulatable = false} };
+		Property stripScale{ {.label = "Strip Scale", .defaultValue = 1, .min = 0} };
+
+		Property IDPool{ {.label = "ID Pool", .filter = CommonFilter::Int, .min = 0, .valuePool = {1}, .poolType = PoolType::ID} };
+
+	};                                                     
 
 
 

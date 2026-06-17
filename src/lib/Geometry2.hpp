@@ -10,8 +10,10 @@ using namespace Clipper2Lib;
 
 namespace Sculptor {
 
+	CCPoint asPoint(PointD point);
 	CCPoint moveTowards(CCPoint point, CCPoint target, float distance);
-	CCPoint toPolar(float radius, float theta);
+	CCPoint fromPolar(float radius, float theta);
+	PathsD OpenIntersection(PathsD subjects, PathsD clips);
 
 	using Points = std::vector<CCPoint>;
 
@@ -35,6 +37,8 @@ namespace Sculptor {
 
 		bool contains(CCPoint point) const;
 		bool coincidentWith(const Line& other) const;
+
+		Line shrunk(float distance) const;
 
 		
 
@@ -207,6 +211,8 @@ namespace Sculptor {
 	struct Circle {
 		CCPoint origin;
 		float radius;
+
+		static Circle fromBoundingBox(CCRect rect);
 	};
 
 	using Circles = std::vector<Circle>;

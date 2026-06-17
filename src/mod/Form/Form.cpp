@@ -12,6 +12,8 @@ namespace Sculptor {
 
 	void Form::setup(FormMode mode, CCPoint position) {
 		Manager::get()->getBatchLayer()->addChild(this);
+		debug = CCDrawNode::create();
+		addChild(debug);
 		scheduleUpdate();
 		setPosition(position);
 
@@ -28,7 +30,7 @@ namespace Sculptor {
 		CCNode::onExit();
 	}
 
-	void Form::update(float dt) {
+	void Form::update(float dt) {	
 
 		if (dirty && Manager::get()->isActive && Manager::get()->selectedForm && Manager::get()->selectedForm == this) {
 			dirty = false;
@@ -128,6 +130,25 @@ namespace Sculptor {
 		}
 		modulators.clear();
 		UI::get()->updateUI();
+	}
+
+	std::optional<Modulator*> Form::getEquivalentModulator(Modulator* modulator) {
+		for (auto& m : modulators) {
+			if (m->isEquivalent(modulator)) return m;
+		}
+		return std::nullopt;
+	}
+
+	void Form::copyStyleTo(Form* other) {
+		other->removeAllModulators();
+		other->removeAllLayers();
+
+		for (const auto& modulator : modulators) {
+			Manager::get()->copyModulatorTo(modulator, other);
+		}
+		for (const auto& layer : layers) {
+			Manager::get()->copyLayerTo(layer, other);
+		}
 	}
 
 	Sequences Form::getPaths(float inflate) {

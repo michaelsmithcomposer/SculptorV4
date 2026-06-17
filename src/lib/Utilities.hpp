@@ -95,6 +95,12 @@ namespace Sculptor {
 		Open
 	};
 
+	enum class ClipboardState {
+		Form,
+		Layer,
+		Modulator
+	};
+
 	enum class Direction {
 		Horizontal,
 		Vertical

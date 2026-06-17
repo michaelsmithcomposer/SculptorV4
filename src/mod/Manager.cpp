@@ -27,11 +27,19 @@ namespace Sculptor {
 		time += dt;
 
 		if (!reconstructed) {
-			reconstructed = true;
-			auto data = alpha::level_storage::getSaveContainer(LevelEditorLayer::get(), Mod::get());			
-			matjson::Serialize<Manager*>::fromJson(data["manager"]);
-			deselect();
+			reconstruct();
 		}
+	}
+
+	void Manager::reconstruct() {
+		reconstructed = true;
+		auto data = alpha::level_storage::getSaveContainer(LevelEditorLayer::get(), Mod::get());
+		matjson::Serialize<Manager*>::fromJson(data["manager"]);
+		deselect();
+
+		clipboard = Form::createDefault(FormMode::Closed, CCPoint{ -100, -100 });
+		clipboard->removeAllModulators();
+		clipboard->removeAllLayers();
 	}
 
 	void Manager::onSave() {
@@ -74,6 +82,26 @@ namespace Sculptor {
 		selectedLayer = nullptr;
 		selectedModulator = nullptr;
 		UI::get()->updateUI();
+	}
+
+	Layer* Manager::copyLayerTo(Layer* layer, Form* target) {
+		auto newLayer = static_cast<Layer*>(layer->clone());
+		target->registerLayer(newLayer);
+		layer->copyPropertiesTo(newLayer);
+		return newLayer;				
+	}
+
+	Modulator* Manager::copyModulatorTo(Modulator* modulator, Form* target) {		
+		auto eq = target->getEquivalentModulator(modulator);
+		if (!eq) {
+			auto mod = static_cast<Modulator*>(modulator->clone());
+			modulator->copyPropertiesTo(mod);
+			target->registerModulator(mod);
+			return mod;
+		}
+		else {
+			return *eq;
+		}
 	}
 
 	bool Manager::shouldSelectObject(GameObject* object) {

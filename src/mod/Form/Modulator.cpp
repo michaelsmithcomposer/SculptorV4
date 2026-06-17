@@ -40,6 +40,22 @@ namespace Sculptor {
 	
 	}
 
+	bool Modulator::isEquivalent(Modulator* other) {
+		if (typeid(*this) != typeid(*other)) return false;
+
+		for (auto [prop, otherProp] : std::views::zip(getProperties(), other->getProperties())) {
+			if (!isClose(prop->getBaseValue(), otherProp->getBaseValue())) return false;
+		}
+
+		return true;
+	}
+
+	void Modulator::copyPropertiesTo(Modulator* other) {
+		for (auto [prop, otherProp] : std::views::zip(getProperties(), other->getProperties())) {
+			otherProp->setBaseValue(prop->getBaseValue());
+		}
+	}
+
 	float NoiseModulator::sample(const ModulationContext& context) {
 		if (!context.objectState || !context.layer) return CCRANDOM_MINUS1_1();
 		if (context.layer) return noiseIndex(context.layer->objectIndex);				

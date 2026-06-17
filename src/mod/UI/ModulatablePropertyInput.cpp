@@ -18,6 +18,7 @@ namespace Sculptor {
         this->property = property;
 
         this->setContentSize(size);
+        this->setAnchorPoint({ 0.5, 0.5 });
         base = createBase(size);
         this->addChildAtPosition(base, Anchor::Center);
         label->setString(property->info.label.c_str());

@@ -18,6 +18,13 @@ namespace Sculptor {
 	class ModulatorPropertiesPanel;
 	class FormSettingsPanel;
 
+	struct DecoratorButton {
+		CCMenuItemSpriteExtra* button;
+		Anchor anchor;
+		CCPoint offset = { 0, 0 };
+		
+	};
+
 
 	class UI : public SculptorNode<UI> {
 	public:
@@ -28,7 +35,8 @@ namespace Sculptor {
 		void setup();
 
 		void createTab();
-		static CCMenu* createComponentButton(CCSprite* sprite, bool selected, CCObject* target, SEL_MenuHandler selectCallback, SEL_MenuHandler deleteCallback, SEL_MenuHandler copyCallback, int tag);
+		//static CCMenu* createComponentButton(CCSprite* sprite, bool selected, CCObject* target, SEL_MenuHandler selectCallback, SEL_MenuHandler deleteCallback, SEL_MenuHandler copyCallback, int tag);
+		static CCMenu* createNodeBadges(CCNode* node, std::vector<DecoratorButton>);
 		void updateUI();
 
 		void onModeEnter();

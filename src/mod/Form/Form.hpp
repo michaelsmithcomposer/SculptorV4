@@ -40,6 +40,10 @@ namespace Sculptor {
 		void removeModulator(Modulator* modulator);
 		void removeAllModulators();
 
+		std::optional<Modulator*> getEquivalentModulator(Modulator* modulator);
+		void copyStyleTo(Form* other);
+
+
 		Sequences getPaths(float inflate);
 		Polys getDecomposition(float inflate);
 		Triangles getTriangulation(float inflate);		
@@ -56,6 +60,8 @@ namespace Sculptor {
 		int getLayerID(Layer* layer) {
 			return std::ranges::find(layers, layer) - layers.begin();
 		}
+
+		CCDrawNode* debug;
 
 	private:
 

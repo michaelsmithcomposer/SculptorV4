@@ -65,7 +65,7 @@ namespace Sculptor {
 			projection = isBezier ? ctrlProjection : pathProjection;
 			condition =	(form == Manager::get()->selectedForm &&
 						mouse.getDistance(projection) < visibilityRadius) && 
-						std::ranges::none_of(nodes, [projection](TreeNode* n) { return n->node->getPosition().getDistance(projection) < visibilityRadius; });
+						std::ranges::none_of(getAllUINodes(), [projection](UINode* n) { return n->getPosition().getDistance(projection) < visibilityRadius; });
 		}
 
 		if (!mouseNode->active && condition) {

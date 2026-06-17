@@ -19,7 +19,7 @@ add_library(${PROJECT_NAME} SHARED ${SOURCES}
     "src/mod/Manager.cpp" 
     "src/mod/Property.cpp"
     "src/external/clipper.engine.cpp" 
-    "src/external/clipper.triangulation.cpp"  "src/lib/UINode.cpp" "src/hooks/EditorUI.cpp" "src/lib/Utilities.cpp" "src/mod/UI/UI.cpp" "src/mod/Form/Form.cpp" "src/mod/Form/VectorEditor.cpp" "src/mod/Serialization.cpp" "src/hooks/EditorPauseLayer.cpp" "src/lib/Grid.cpp" "src/mod/UI/PropertyInput.cpp" "src/mod/UI/ModulatablePropertyInput.cpp" "src/mod/UI/SelectionPopup.cpp" "src/lib/Geometry2.cpp" "src/mod/UI/PoolInput.cpp" "src/mod/Chain.cpp" )
+    "src/external/clipper.triangulation.cpp"  "src/lib/UINode.cpp" "src/hooks/EditorUI.cpp" "src/lib/Utilities.cpp" "src/mod/UI/UI.cpp" "src/mod/Form/Form.cpp" "src/mod/Form/VectorEditor.cpp" "src/mod/Serialization.cpp" "src/hooks/EditorPauseLayer.cpp" "src/lib/Grid.cpp" "src/mod/UI/PropertyInput.cpp" "src/mod/UI/ModulatablePropertyInput.cpp" "src/mod/UI/SelectionPopup.cpp" "src/lib/Geometry2.cpp" "src/mod/UI/PoolInput.cpp" "src/mod/Chain.cpp"  "src/mod/UI/Graph.cpp")
 
 target_include_directories(${PROJECT_NAME} PRIVATE src)
 

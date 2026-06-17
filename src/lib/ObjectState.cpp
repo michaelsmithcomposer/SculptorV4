@@ -37,8 +37,8 @@ namespace Sculptor {
 
 		object->resetGroups();
 		for (const auto& groupID : groups) {
-			object->addToGroup(groupID);
-		}
+			object->addToGroup(groupID);			
+		}		
 
 		object->m_updateParents = true;
 		LevelEditorLayer::get()->updateObjectSection(object);
