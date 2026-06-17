@@ -12,12 +12,14 @@ namespace Sculptor {
 	}
 
 	GameObject* ObjectState::applyTo(GameObject* object) {
+
 		object->setPositionX(x);
 		object->setPositionY(y);
 		object->updateCustomScaleX(scale * scaleX);
 		object->updateCustomScaleY(scale * scaleY);
 		object->setRotationX(-(rotation + rotationX));
 		object->setRotationY(-(rotation + rotationY));
+
 		auto arr = CCArray::create();
 		arr->addObject(object);
 		if (flipX) EditorUI::get()->flipObjectsX(arr);
@@ -37,12 +39,13 @@ namespace Sculptor {
 
 		object->resetGroups();
 		for (const auto& groupID : groups) {
-			object->addToGroup(groupID);			
+			LevelEditorLayer::get()->addToGroup(object, ID, false);
 		}		
 
 		object->m_updateParents = true;
 		LevelEditorLayer::get()->updateObjectSection(object);
 		LevelEditorLayer::get()->reorderObjectSection(object);
+		LevelEditorLayer::get()->resetToggledGroupsAndObjects();
 
 		return object;
 	}
