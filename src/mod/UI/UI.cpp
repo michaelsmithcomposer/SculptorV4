@@ -13,7 +13,6 @@ using namespace geode::prelude;
 
 namespace Sculptor {
 
-
 	void UI::setup() {		
 		instance = this;	
 
@@ -49,12 +48,16 @@ namespace Sculptor {
 			auto tabBar = EditorUI::get()->getChildByIDRecursive("sculptor-tab-bar"_spr);
 			if (!tabBar) return;
 
+			auto winSize = CCDirector::get()->getWinSize();
+
+			tabBar->setPositionX(winSize.width / 2);
+
 			tab = tabBar->getChildByType<BoomScrollLayer>(0);
 
 			page = CCNode::create();
 			page->setID("page"_spr);
 			page->setContentSize(pageSize);
-			page->setAnchorPoint({ 0.5f, 0.f });
+			page->setAnchorPoint({ 0.5f, 0.5f });
 
 			columns = CCNode::create();
 			columns->setContentSize(pageSize);
@@ -62,12 +65,17 @@ namespace Sculptor {
 			page->addChild(columns);
 
 			if (tab) {
-				page->setPositionX(tab->getContentWidth() / 2);
-				page->setScale(EditorUI::get()->m_toolbarHeight / 92);
+				float scale = EditorUI::get()->m_toolbarHeight / 92;
+				float scaleMult = pageSize.width / (winSize.width / scale);
+
+				page->setPosition(tab->getContentSize() / 2);
+				page->setScale(scale / scaleMult);
 				tab->addChild(page);
 			}
 			else {
-				page->setPositionX(tabBar->getContentWidth() / 2);
+				float scaleMult = pageSize.width / (winSize.width / tabBar->getScale());
+				page->setPosition(tabBar->getContentSize() / 2);
+				page->setScale(1 / scaleMult);
 				tabBar->addChild(page);
 			}
 		}	
@@ -147,8 +155,13 @@ namespace Sculptor {
 		grid = Grid::create(size, Direction::Horizontal, 1, 3);		
 		addChildAtPosition(grid, Anchor::Center);
 
-		EditorUI::get()->addChild(this);
-		setPosition(60, 240);
+		auto winSize = CCDirector::get()->getWinSize();
+
+		auto editorUI = EditorUI::get();
+		editorUI->m_uiItems->addObject(this);
+		editorUI->addChild(this);
+
+		setPosition(50, winSize.height / 2 + editorUI->m_toolbarHeight / 2 + 33.5f);
 		setScale(0.6);
 	}
 
