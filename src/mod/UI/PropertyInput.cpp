@@ -47,7 +47,7 @@ namespace Sculptor {
 
     void PropertyInput::update(float dt) {
         for (int i = 0; i < valueInput->getString().size(); i++) {
-            spriteAtIndex(i)->setColor(baseColor);
+            spriteAtIndex(i)->setColor(normalColor);
         }
 
         if (!typing) {

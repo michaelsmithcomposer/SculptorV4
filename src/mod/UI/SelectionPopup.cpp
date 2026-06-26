@@ -50,7 +50,7 @@ namespace Sculptor {
 		}
 		
 		leftButton->setVisible(page > 0);
-		rightButton->setVisible(page < floor(totalElementCount / (rows * columns)));
+		rightButton->setVisible(page < ceil(static_cast<float>(totalElementCount) / (rows * columns)) - 1);
 		
 	}
 

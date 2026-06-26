@@ -67,7 +67,7 @@ namespace Sculptor {
 
 	int safeModulo(int a, int b);
 
-	NineSlice* createBase(CCSize size, CCSize padding = { 0, 0 });
+	NineSlice* createBase(CCSize size, ccColor3B color = ccc3(0, 0, 0), CCSize padding = {0, 0});
 
 	int validateID(int ID);
 

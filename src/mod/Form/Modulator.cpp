@@ -40,6 +40,20 @@ namespace Sculptor {
 	
 	}
 
+	float Modulator::evaluate(const ModulationContext& context) {
+		float value = sample(context);
+
+		float r = ramp.evaluate({});
+		float exp = r > 0 ? 1 + r : 1 / (1 - r);
+
+		value = pow(abs(value), exp) * sign(value);
+		value *= depth.evaluate({});
+		value += offset.evaluate({});
+		//value = wrap(value, rangeMin.evaluate({}), rangeMax.evaluate({}));
+
+		return value;
+	}
+
 	bool Modulator::isEquivalent(Modulator* other) {
 		if (typeid(*this) != typeid(*other)) return false;
 

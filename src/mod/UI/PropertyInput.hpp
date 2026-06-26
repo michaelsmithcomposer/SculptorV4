@@ -16,9 +16,12 @@ namespace Sculptor {
 
 		void setProperty(Property* property);
 		
-		void setColor(const ccColor3B color) { baseColor = color; }
+
+		void setColor(const ccColor3B color) { normalColor = color; }		
 		void setHighlightColor(const ccColor3B color) { highlightColor = color; }
+
 		void setBaseVisible(bool visible) { base->setVisible(visible); }
+		void setBaseColor(ccColor3B color) { base->setColor(color); }
 
 	private:
 		
@@ -34,7 +37,7 @@ namespace Sculptor {
 		ListenerHandle mouseListener;
 		ListenerHandle scrollListener;
 
-		ccColor3B baseColor = { 255, 255, 255 };
+		ccColor3B normalColor = { 255, 255, 255 };
 		ccColor3B highlightColor = { 155, 155, 155 };
 
 		void update(float dt);

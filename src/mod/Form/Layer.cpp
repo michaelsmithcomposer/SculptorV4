@@ -225,6 +225,7 @@ namespace Sculptor {
 						.x = edge.a().x,
 						.y = edge.a().y,
 						.scale = glowWidth.evaluate({}),
+						.color = (int)colorPool.evaluate(context)
 					};
 				});
 
@@ -241,7 +242,8 @@ namespace Sculptor {
 							.y = position.y,
 							.rotation = CC_RADIANS_TO_DEGREES(normal.getAngle() - (PI / 2)),
 							.scaleX = middle.length() / (gdUnit / 2),
-							.scaleY = width
+							.scaleY = width,
+							.color = (int)colorPool.evaluate(context)
 						};
 					});
 					buildObject({ .edge = &edge, .sequence = &sequence }, [&](auto context) {
@@ -252,7 +254,8 @@ namespace Sculptor {
 							.x = position.x,
 							.y = position.y,
 							.rotation = CC_RADIANS_TO_DEGREES(normal.getAngle() - (PI / 2)),
-							.scale = width						
+							.scale = width,
+							.color = (int)colorPool.evaluate(context)
 						};
 					});
 					buildObject({ .edge = &edge, .sequence = &sequence }, [&](auto context) {
@@ -263,7 +266,8 @@ namespace Sculptor {
 							.x = position.x,
 							.y = position.y,
 							.rotation = CC_RADIANS_TO_DEGREES(normal.getAngle() + PI),
-							.scale = width
+							.scale = width,
+							.color = (int)colorPool.evaluate(context)
 						};
 					});					
 				}
@@ -274,7 +278,8 @@ namespace Sculptor {
 							.ID = objectIDs[GDObject::QuarterGlow],
 							.x = edge.lerp(0.5).x,
 							.y = edge.lerp(0.5).y,							
-							.scale = width
+							.scale = width,
+							.color = (int)colorPool.evaluate(context)
 						};
 					});				
 				}
@@ -295,7 +300,12 @@ namespace Sculptor {
 				float s = 0.0f;
 				buildObject({ .sequence = &sequence }, [&](auto context) {					
 					s = spacing.evaluate(context);
-					return ObjectState{.ID = (int)IDPool.evaluate(context), .x = position.x, .y = position.y, .color = (int)colorPool.evaluate(context) };
+					return ObjectState{
+						.ID = (int)IDPool.evaluate(context), 
+						.x = position.x, 
+						.y = position.y, 
+						.color = (int)colorPool.evaluate(context) 
+					};
 				});
 
 				l += s;				

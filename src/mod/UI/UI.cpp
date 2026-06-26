@@ -2,6 +2,7 @@
 #include <alphalaneous.editortab_api/include/EditorTabAPI.hpp>
 #include "mod/UI/UI.hpp"
 #include "mod/Manager.hpp"
+#include "mod/UI/ModulatablePropertyInput.hpp"
 #include "mod/Form/Modulator.hpp"
 #include "mod/Form/Layer.hpp"
 #include "mod/Form/VectorEditor.hpp"
@@ -19,6 +20,12 @@ namespace Sculptor {
 		mouseListener = MouseInputEvent().listen([this](MouseInputData data) { return this->handleMouseData(data); });
 
 		sculptorPanel = SculptorPanel::create();
+
+		alpha::editor_tabs::addModeSwitchCallback([this](auto id) {
+			if (id != "sculptor") {
+				onModeExit();
+			}
+		});
 
 		updateUI();
 	}
@@ -138,7 +145,7 @@ namespace Sculptor {
 
 	void SculptorPanel::updateUI() {
 
-		grid->clear();
+		grid->clear();		
 
 		if (alpha::editor_tabs::getCurrentMode().unwrap() == "sculptor") {			
 			grid->addElement(CCMenuItemSpriteExtra::create(CCSprite::create("return.png"_spr), this, menu_selector(SculptorPanel::onReturnButton)));			
@@ -166,7 +173,7 @@ namespace Sculptor {
 	void FormSettingsPanel::setup() {
 		setContentSize(size);
 
-		base = createBase(size, { -1, 0 });
+		base = createBase(size);
 		addChildAtPosition(base, Anchor::Center);
 
 		grid = Grid::create(size, Direction::Vertical, 1, 0);
@@ -179,12 +186,12 @@ namespace Sculptor {
 		grid->clear();	
 
 		std::vector<CCNode*> elements;
-		elements.push_back(CCMenuItemSpriteExtra::create(CCSprite::create("create.png"_spr), this, menu_selector(FormSettingsPanel::onNewFormButton)));				
+		elements.push_back(CCMenuItemSpriteExtra::create(CCSprite::create("create_circle.png"_spr), this, menu_selector(FormSettingsPanel::onNewFormButton)));				
 
 		if (Manager::get()->selectedForm) {
-			elements.push_back(CCMenuItemSpriteExtra::create(CCSprite::create("delete.png"_spr), this, menu_selector(FormSettingsPanel::onDeleteFormButton)));
-			elements.push_back(CCMenuItemSpriteExtra::create(CCSprite::create("copy.png"_spr), this, menu_selector(FormSettingsPanel::onCopyButton)));
-			auto sprite = CCSprite::create("paste.png"_spr);
+			elements.push_back(CCMenuItemSpriteExtra::create(CCSprite::create("delete_circle.png"_spr), this, menu_selector(FormSettingsPanel::onDeleteFormButton)));
+			elements.push_back(CCMenuItemSpriteExtra::create(CCSprite::create("copy_circle.png"_spr), this, menu_selector(FormSettingsPanel::onCopyButton)));
+			auto sprite = CCSprite::create("paste_circle.png"_spr);
 			if (Manager::get()->clipboard->layers.size() < 1 || Manager::get()->clipboardState != ClipboardState::Form) {
 				sprite->setOpacity(50);
 				elements.push_back(sprite);
@@ -192,7 +199,7 @@ namespace Sculptor {
 			else {
 				elements.push_back(CCMenuItemSpriteExtra::create(sprite, this, menu_selector(FormSettingsPanel::onPasteButton)));
 			}			
-			elements.push_back(CCMenuItemSpriteExtra::create(CCSprite::create("flatten.png"_spr), this, menu_selector(FormSettingsPanel::onFlattenButton)));
+			elements.push_back(CCMenuItemSpriteExtra::create(CCSprite::create("flatten_circle.png"_spr), this, menu_selector(FormSettingsPanel::onFlattenButton)));
 		}
 		
 		grid->addElements(elements);
@@ -260,7 +267,7 @@ namespace Sculptor {
 	void LayersPanel::setup() {		
 		setContentSize(size);		
 
-		base = createBase(size, {-1, 0});
+		base = createBase(size, ccc3(100, 100, 100));
 		addChildAtPosition(base, Anchor::Center);
 
 		auto node = CCNode::create();
@@ -268,7 +275,7 @@ namespace Sculptor {
 		node->setLayout(ColumnLayout::create()->setGap(0)->setAxisReverse(true)->setAxisAlignment(AxisAlignment::End)->setAutoScale(false));
 
 		topGrid = Grid::create(topSize, Direction::Horizontal, 1, 0);
-		mainGrid = Grid::create(mainSize, Direction::Vertical, 2, 0);
+		mainGrid = Grid::create(mainSize, Direction::Vertical, 3, 0);
 
 		node->addChild(topGrid);
 		node->addChild(mainGrid);
@@ -282,11 +289,12 @@ namespace Sculptor {
 	void LayersPanel::updateUI() {
 		topGrid->clear();
 		mainGrid->clear();		
+		if (!Manager::get()->selectedForm) return;
 		{
 			std::vector<CCNode*> elements;
 			elements.push_back(CCLabelBMFont::create("Layers", "chatFont.fnt"));
-			elements.push_back(CCMenuItemSpriteExtra::create(CCSprite::create("create.png"_spr), this, menu_selector(LayersPanel::onNewLayerButton)));
-			auto sprite = CCSprite::create("create_paste.png"_spr);	
+			elements.push_back(CCMenuItemSpriteExtra::create(CCSprite::create("create_circle.png"_spr), this, menu_selector(LayersPanel::onNewLayerButton)));
+			auto sprite = CCSprite::create("create_paste_circle.png"_spr);	
 			if (Manager::get()->clipboard->layers.size() != 1 || Manager::get()->clipboardState != ClipboardState::Layer) {
 				sprite->setOpacity(50);
 				elements.push_back(sprite);
@@ -303,10 +311,10 @@ namespace Sculptor {
 				auto button = CCMenuItemSpriteExtra::create(CCSprite::create(layer->spritePath.c_str()), this, menu_selector(LayersPanel::onSelectLayerButton));
 				button->setTag(i);
 				if (layer == Manager::get()->selectedLayer) {
-					auto deleteSprite = CCSprite::create("delete.png"_spr);
-					deleteSprite->setScale(0.3);
-					auto copySprite = CCSprite::create("copy.png"_spr);
-					copySprite->setScale(0.3);
+					auto deleteSprite = CCSprite::create("delete_circle.png"_spr);
+					deleteSprite->setScale(0.5);
+					auto copySprite = CCSprite::create("copy_circle.png"_spr);
+					copySprite->setScale(0.5);
 
 					elements.push_back(UI::createNodeBadges(button, { 
 						{ CCMenuItemSpriteExtra::create(deleteSprite, this, menu_selector(LayersPanel::onDeleteLayerButton)), Anchor::TopRight, {-5, -5} }, 
@@ -371,7 +379,7 @@ namespace Sculptor {
 	void LayerTabsPanel::setup() {
 		setContentSize(size);
 
-		base = createBase(size, { -1, 0 });
+		base = createBase(size);
 		addChildAtPosition(base, Anchor::Center);
 
 		grid = Grid::create(size, Direction::Vertical, 1, 0);
@@ -405,7 +413,7 @@ namespace Sculptor {
 	void LayerPropertiesPanel::setup() {
 		setContentSize(size);
 
-		base = createBase(size, { -1, 0 });
+		base = createBase(size);
 		addChildAtPosition(base, Anchor::Center);
 
 		grid = Grid::create(size, Direction::Horizontal, 3, 0);
@@ -429,14 +437,14 @@ namespace Sculptor {
 				}
 				break;
 			case LayerTab::Offset:				
-				for (const auto& property : layer->getBaseProperties()) {
+				for (const auto& [i, property] : std::views::enumerate(layer->getBaseProperties())) {				
 					elements.push_back(property->createUI(UI::elementSize));
 				}
 				break;
 			case LayerTab::Group:
 				for (const auto& [i, property] : std::views::enumerate(layer->groups)) {
 					auto sprite = CCSprite::create("delete.png"_spr);
-					sprite->setScale(0.3);
+					sprite->setScale(0.5);
 					auto button = CCMenuItemSpriteExtra::create(sprite, this, menu_selector(LayerPropertiesPanel::onDeleteGroupButton));
 					button->setTag(i);
 					elements.push_back(UI::createNodeBadges(property->createUI(UI::elementSize), { { button, Anchor::TopRight, {-5, -5 } } }));
@@ -467,8 +475,8 @@ namespace Sculptor {
 
 	void ModulatorsPanel::setup() {
 		setContentSize(size);
-
-		base = createBase(size, { -1, 0 });
+		
+		base = createBase(size, ccc3(100, 100, 100));
 		addChildAtPosition(base, Anchor::Center);
 
 		auto node = CCNode::create();
@@ -476,7 +484,7 @@ namespace Sculptor {
 		node->setLayout(ColumnLayout::create()->setGap(0)->setAxisReverse(true)->setAxisAlignment(AxisAlignment::End)->setAutoScale(false));
 
 		topGrid = Grid::create(topSize, Direction::Horizontal, 1);
-		mainGrid = Grid::create(mainSize, Direction::Vertical, 2);
+		mainGrid = Grid::create(mainSize, Direction::Vertical, 3);
 
 		node->addChild(topGrid);
 		node->addChild(mainGrid);
@@ -490,11 +498,12 @@ namespace Sculptor {
 	void ModulatorsPanel::updateUI() {
 		topGrid->clear();
 		mainGrid->clear();
+		if (!Manager::get()->selectedForm) return;
 		{
 			std::vector<CCNode*> elements;
 			elements.push_back(CCLabelBMFont::create("Mods", "chatFont.fnt"));
-			elements.push_back(CCMenuItemSpriteExtra::create(CCSprite::create("create.png"_spr), this, menu_selector(ModulatorsPanel::onNewModulatorButton)));
-			auto sprite = CCSprite::create("create_paste.png"_spr);
+			elements.push_back(CCMenuItemSpriteExtra::create(CCSprite::create("create_circle.png"_spr), this, menu_selector(ModulatorsPanel::onNewModulatorButton)));
+			auto sprite = CCSprite::create("create_paste_circle.png"_spr);
 			if (Manager::get()->clipboard->modulators.size() != 1 || Manager::get()->clipboardState != ClipboardState::Modulator) {
 				sprite->setOpacity(50);
 				elements.push_back(sprite);
@@ -511,10 +520,10 @@ namespace Sculptor {
 				auto button = CCMenuItemSpriteExtra::create(CCSprite::create(modulator->spritePath.c_str()), this, menu_selector(ModulatorsPanel::onSelectModulatorButton));
 				button->setTag(i);
 				if (modulator == Manager::get()->selectedModulator) {
-					auto deleteSprite = CCSprite::create("delete.png"_spr);
-					deleteSprite->setScale(0.3);
-					auto copySprite = CCSprite::create("copy.png"_spr);
-					copySprite->setScale(0.3);
+					auto deleteSprite = CCSprite::create("delete_circle.png"_spr);
+					deleteSprite->setScale(0.5);
+					auto copySprite = CCSprite::create("copy_circle.png"_spr);
+					copySprite->setScale(0.5);
 
 					elements.push_back(UI::createNodeBadges(button, {
 						{ CCMenuItemSpriteExtra::create(deleteSprite, this, menu_selector(ModulatorsPanel::onDeleteModulatorButton)), Anchor::TopRight, {-5, -5} },
@@ -578,8 +587,8 @@ namespace Sculptor {
 
 	void ModulatorPropertiesPanel::setup() {
 		setContentSize(size);
-
-		base = createBase(size, { -1, 0 });
+		
+		base = createBase(size);
 		addChildAtPosition(base, Anchor::Center);
 
 		grid = Grid::create(size, Direction::Vertical, 2, 0);

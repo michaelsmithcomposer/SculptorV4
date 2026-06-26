@@ -17,6 +17,7 @@ namespace Sculptor {
         void setup(Property* property, CCSize size);
 
         void updateTextColor();
+        void setBaseColor(ccColor3B color) { base->setColor(color); }
 
     private:
 

@@ -31,29 +31,20 @@ namespace Sculptor {
 		virtual float sample(const ModulationContext& context) = 0;
 
 		std::vector<Property*> getBaseProperties() override {
+			//return { &depth, &offset, &ramp, &rangeMin, &rangeMax };
 			return { &depth, &offset, &ramp };
 		}
 
 		bool isEquivalent(Modulator* other);
 		void copyPropertiesTo(Modulator* other);
 
-		float evaluate(const ModulationContext& context) {
-			float value = sample(context);
-
-			float r = ramp.evaluate({});
-			float exp = r > 0 ? 1 + r : 1 / (1 - r);
-
-			value = pow(abs(value), exp) * sign(value);
-			value *= depth.evaluate({});
-			value += offset.evaluate({});
-
-			return value;
-		}
+		float evaluate(const ModulationContext& context);
 
 		Property depth{ {.label = "depth", .isModulatable = false, .defaultValue = 1} };
 		Property offset{ {.label = "offset", .isModulatable = false} };
-		Property ramp{ {.label = "ramp", .isModulatable = false} };
-
+		Property ramp{ {.label = "ramp", .isModulatable = false} };		
+		//Property rangeMin{ {.label = "min", .isModulatable = false, .defaultValue = -1} };
+		//Property rangeMax{ {.label = "max", .isModulatable = false, .defaultValue = 1} };
 	
 		bool contextual = true;
 		ccColor3B color;

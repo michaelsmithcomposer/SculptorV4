@@ -24,7 +24,7 @@ namespace Sculptor {
 		arr->addObject(object);
 		if (flipX) EditorUI::get()->flipObjectsX(arr);
 		if (flipY) EditorUI::get()->flipObjectsY(arr);
-
+	
 		object->setCustomZLayer(zLayer);
 		object->m_zOrder = zOrder;
 		object->m_editorLayer = editorLayer;
@@ -38,14 +38,19 @@ namespace Sculptor {
 		object->m_baseColor->m_hsv.absoluteSaturation = absoluteSaturation;
 
 		object->resetGroups();
+		object->resetColorGroups();
 		for (const auto& groupID : groups) {
-			LevelEditorLayer::get()->addToGroup(object, groupID, false);
+			int added = object->addToGroup(groupID);
+			if (added) {
+				LevelEditorLayer::get()->addToGroup(object, groupID, false);
+			}			
 		}		
 
 		object->m_updateParents = true;
 		LevelEditorLayer::get()->updateObjectSection(object);
 		LevelEditorLayer::get()->reorderObjectSection(object);
-		LevelEditorLayer::get()->resetToggledGroupsAndObjects();		
+		LevelEditorLayer::get()->resetToggledGroupsAndObjects();			
+		LevelEditorLayer::get()->m_unk3b22 = true;
 
 		return object;
 	}

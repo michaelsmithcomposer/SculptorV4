@@ -135,12 +135,12 @@ namespace Sculptor {
 		OutlineLayer* clone() override { return new OutlineLayer; }
 		void evaluate();
 		std::vector<Property*> getTypeProperties() override {
-			return { &IDPool, &colorPool, &pathOffset, &lineWidth };
+			return { &colorPool, &pathOffset, &lineWidth };
 		}
 
 		Property lineWidth{ { .label = "Line Width", .defaultValue = 1 } };		
 
-		Property IDPool{ {.label = "ID Pool", .filter = CommonFilter::Int, .min = 0, .valuePool = {(float)objectIDs[GDObject::Line]}, .poolType = PoolType::ID}};
+		//Property IDPool{ {.label = "ID Pool", .filter = CommonFilter::Int, .min = 0, .valuePool = {(float)objectIDs[GDObject::Line]}, .poolType = PoolType::ID}};
 	
 	};
 
@@ -218,7 +218,7 @@ namespace Sculptor {
 		}
 		
 		Property stripAngle{ {.label = "Strip Angle", .isModulatable = false} };
-		Property stripScale{ {.label = "Strip Scale", .defaultValue = 1, .min = 0} };
+		Property stripScale{ {.label = "Strip Scale", .defaultValue = 1, .min = 0.05} };
 
 		Property IDPool{ {.label = "ID Pool", .filter = CommonFilter::Int, .min = 0, .valuePool = {1}, .poolType = PoolType::ID} };
 

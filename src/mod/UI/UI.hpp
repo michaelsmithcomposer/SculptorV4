@@ -35,7 +35,6 @@ namespace Sculptor {
 		void setup();
 
 		void createTab();
-		//static CCMenu* createComponentButton(CCSprite* sprite, bool selected, CCObject* target, SEL_MenuHandler selectCallback, SEL_MenuHandler deleteCallback, SEL_MenuHandler copyCallback, int tag);
 		static CCMenu* createNodeBadges(CCNode* node, std::vector<DecoratorButton>);
 		void updateUI();
 
@@ -144,9 +143,9 @@ namespace Sculptor {
 		void onCopyLayerButton(CCObject* sender);
 		void onPasteLayerButton(CCObject* sender);
 
-		static constexpr CCSize size = { 0.1 * UI::pageSize.width, UI::pageSize.height };
-		static constexpr CCSize topSize = { 0.1 * UI::pageSize.width, 0.2 * UI::pageSize.height };
-		static constexpr CCSize mainSize = { 0.1 * UI::pageSize.width, 0.8 * UI::pageSize.height };
+		static constexpr CCSize size = { 0.125 * UI::pageSize.width, UI::pageSize.height };
+		static constexpr CCSize topSize = { size.width, 0.2 * UI::pageSize.height };
+		static constexpr CCSize mainSize = { size.width, 0.8 * UI::pageSize.height };
 
 	};
 
@@ -216,9 +215,9 @@ namespace Sculptor {
 		void onCopyModulatorButton(CCObject* sender);
 		void onPasteModulatorButton(CCObject* sender);
 
-		static constexpr CCSize size = { 0.1 * UI::pageSize.width, UI::pageSize.height };
-		static constexpr CCSize topSize = { 0.1 * UI::pageSize.width, 0.2 * UI::pageSize.height };
-		static constexpr CCSize mainSize = { 0.1 * UI::pageSize.width, 0.8 * UI::pageSize.height };
+		static constexpr CCSize size = { 0.125 * UI::pageSize.width, UI::pageSize.height };
+		static constexpr CCSize topSize = { size.width, 0.2 * UI::pageSize.height };
+		static constexpr CCSize mainSize = { size.width, 0.8 * UI::pageSize.height };
 
 	};
 

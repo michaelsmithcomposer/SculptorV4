@@ -11,8 +11,9 @@ using namespace geode::prelude;
 namespace Sculptor {
 
 	void Form::setup(FormMode mode, CCPoint position) {
-		Manager::get()->getBatchLayer()->addChild(this);
+		Manager::get()->formLayer->addChild(this);
 		debug = CCDrawNode::create();
+		setZOrder(1000);
 		addChild(debug);
 		scheduleUpdate();
 		setPosition(position);
@@ -85,6 +86,11 @@ namespace Sculptor {
 	Modulator* Form::registerModulator(Modulator* modulator) {
 		modulator->form = this;	
 		this->modulators.push_back(modulator);
+		for (auto& property : modulator->getProperties()) {
+			property->setCallback([this](Property* p) {
+				dirty = true;
+			});
+		}
 		return modulator;
 	}
 

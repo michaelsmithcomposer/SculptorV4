@@ -53,13 +53,7 @@ namespace Sculptor {
 
 	private:
 
-		void update(float dt);
-		
-
-		
-		ListenerHandle keyboardListener;
-		ListenerResult handleKeyboardData(KeyboardInputData data);
-		
+		void update(float dt);		
 
 		void createMouseNode();
 

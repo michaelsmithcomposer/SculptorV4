@@ -22,6 +22,8 @@ namespace Sculptor {
 		void reconstruct();
 		void onSave();
 
+		CCNode* formLayer;
+
 		std::vector<Form*> forms;
 
 		Form* selectedForm;
@@ -51,9 +53,7 @@ namespace Sculptor {
 
 		bool shouldSelectObject(GameObject* object);
 
-		CCNode* getBatchLayer() {
-			return LevelEditorLayer::get()->getChildByID("main-node")->getChildByID("batch-layer");
-		}
+		CCNode* getBatchLayer();
 
 		float time = 0.f;
 

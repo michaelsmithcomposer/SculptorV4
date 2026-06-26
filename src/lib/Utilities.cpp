@@ -111,11 +111,11 @@ namespace Sculptor {
 	}
 
 	CCPoint toEditorSpace(CCPoint point) {
-		return LevelEditorLayer::get()->getChildByID("main-node")->getChildByID("batch-layer")->convertToNodeSpace(point);
+		return Manager::get()->getBatchLayer()->convertToNodeSpace(point);
 	}
 
 	CCPoint fromEditorSpace(CCPoint point) {
-		return LevelEditorLayer::get()->getChildByID("main-node")->getChildByID("batch-layer")->convertToWorldSpace(point);
+		return Manager::get()->getBatchLayer()->convertToWorldSpace(point);
 	}
 
 	float roundTo(float value, int places) {
@@ -161,10 +161,10 @@ namespace Sculptor {
 		return CCKeyboardDispatcher::get()->m_bShiftPressed;
 	}
 
-	NineSlice* createBase(CCSize size, CCSize padding) {
+	NineSlice* createBase(CCSize size, ccColor3B color, CCSize padding) {
 		auto base = NineSlice::create("square02b_001.png", { 0, 0, 80, 80 });
 		base->setScale(0.5);
-		base->setColor({ 0, 0, 0 });
+		base->setColor(color);
 		base->setOpacity(45);
 		base->setContentSize({ (size.width + padding.width) * 2, (size.height + padding.height) * 2 });
 		return base;

@@ -12,9 +12,7 @@ namespace Sculptor {
 	void VectorEditor::setup() {
 
 		scheduleUpdate();
-		setBlendFunc({ GL_ONE_MINUS_DST_COLOR, GL_ONE_MINUS_SRC_COLOR });
-		setZOrder(200);
-		keyboardListener = KeyboardInputEvent().listen([this](KeyboardInputData data) { this->handleKeyboardData(data); });
+		setBlendFunc({ GL_ONE_MINUS_DST_COLOR, GL_ONE_MINUS_SRC_COLOR });		
 
 		createMouseNode();	
 
@@ -91,12 +89,15 @@ namespace Sculptor {
 		clear();
 		if (nodes.size() <= 1) return;
 
+		float scale = 1 / Manager::get()->getBatchLayer()->getScale();
+		
+
 		if (showControlPath) {
 			auto path = getControlPaths();
 			for (const auto& seq : path) {
 				if (seq.size() > 2) {					
-					Points dashes = Sequence::dashed(seq, 4, 0.35).points();
-					drawLines(dashes.data(), dashes.size(), 0.1, { 1.0, 1.0, 1.0, 0.15 });					
+					Points dashes = Sequence::dashed(seq, 4 * scale, 0.35).points();
+					drawLines(dashes.data(), dashes.size(), 0.1 * scale, { 1.0, 1.0, 1.0, 0.15 });					
 				}
 			}
 		}
@@ -104,44 +105,23 @@ namespace Sculptor {
 		if (showPath) {
 			for (const auto& poly : getDecomposition(0.1)) {
 				Points points = poly.points();
-				drawPolygon(points.data(), points.size(), { 0.0, 0.0, 0.0, 0.0 }, 0.1, { 1.0, 1.0, 1.0, 0.35 });
+				drawPolygon(points.data(), points.size(), { 0.0, 0.0, 0.0, 0.0 }, 0.1 * scale, { 1.0, 1.0, 1.0, 0.35 });
 			}
 		}
 
 		if (showHitbox) {
 			for (const auto& poly : getDecomposition(form->mode == FormMode::Open ? 10 : 1)) {				
-				Points dashes = Sequence::dashed(poly, 4, 0.35).points();
-				drawLines(dashes.data(), dashes.size(), 0.25, { 1.0, 1.0, 1.0, 0.15 });				
+				Points dashes = Sequence::dashed(poly, 4 * scale, 0.35).points();
+				drawLines(dashes.data(), dashes.size(), 0.25 * scale, { 1.0, 1.0, 1.0, 0.15 });				
 			}
-		}
+		}	
+
 	}
-
-
-	ListenerResult VectorEditor::handleKeyboardData(KeyboardInputData data) {
-		
-		if (data.action == KeyboardInputData::Action::Press) {
-			if (data.modifiers & KeyboardModifier::Shift) {
-				for (const auto& node : getAllUINodes()) {
-					proxyObjects.push_back(EditorUI::get()->createObject(objectIDs[GDObject::QuarterSquare], toEditorSpace(convertToWorldSpace(node->getPosition()))));
-				}
-			}			
-		}
-		else if (data.action == KeyboardInputData::Action::Release) {
-			for (auto& object : proxyObjects) {
-				EditorUI::get()->deleteObject(object, false);
-			}
-			proxyObjects.clear();
-		}
-		
-
-		return ListenerResult::Propagate;
-	}
-
 
 	Sequences VectorEditor::getPaths() {
 		Sequences result;
 
-		if (form->mode == FormMode::Closed) {
+		if (form->mode == FormMode::Closed) {		
 
 			Poly poly;
 			TreeNode* current = root;
@@ -165,7 +145,7 @@ namespace Sculptor {
 
 	Sequences VectorEditor::getControlPaths() {
 		Sequences result;
-		for (const auto& n : nodes) {
+		for (const auto& n : nodes) {		
 			if (!n->parent) continue;
 			result.push_back(n->asBezierCurve());
 		}		
