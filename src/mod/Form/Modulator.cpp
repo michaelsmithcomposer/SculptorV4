@@ -73,6 +73,7 @@ namespace Sculptor {
 	float NoiseModulator::sample(const ModulationContext& context) {
 		if (!context.objectState || !context.layer) return CCRANDOM_MINUS1_1();
 		if (context.layer) return noiseIndex(context.layer->objectIndex);				
+		return 0;
 	}
 
 	float XModulator::sample(const ModulationContext& context) {

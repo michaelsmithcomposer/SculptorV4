@@ -46,12 +46,13 @@ namespace Sculptor {
 
 	void UI::createTab() {
 		{
-			tab = EditorUI::get()->getChildByIDRecursive("sculptor-tab-bar"_spr)->getChildByType<BoomScrollLayer>(0);
+			auto tabBar = EditorUI::get()->getChildByIDRecursive("sculptor-tab-bar"_spr);
+			if (!tabBar) return;
+
+			tab = tabBar->getChildByType<BoomScrollLayer>(0);
 
 			page = CCNode::create();
 			page->setID("page"_spr);
-			page->setAnchorPoint({ 0.f, 0.f });
-			page->setPositionX(-96);
 			page->setContentSize(pageSize);
 
 			columns = CCNode::create();
@@ -59,8 +60,16 @@ namespace Sculptor {
 			columns->setLayout(RowLayout::create()->setGap(0)->setAxisAlignment(AxisAlignment::Start)->setAutoScale(false)->setCrossAxisOverflow(false));
 			page->addChild(columns);
 
-
-			tab->addChild(page);
+			if (tab) {
+				page->setAnchorPoint({ 0.f, 0.f });
+				page->setPositionX(-96);
+				tab->addChild(page);
+			}
+			else {
+				tabBar->addChild(page);
+				page->setAnchorPoint({ 0.5f, 0.f });
+				page->setPositionX(tabBar->getContentWidth() / 2);
+			}
 		}	
 
 		formSettingsPanel = FormSettingsPanel::create();
@@ -147,7 +156,7 @@ namespace Sculptor {
 
 		grid->clear();		
 
-		if (alpha::editor_tabs::getCurrentMode().unwrap() == "sculptor") {			
+		if (alpha::editor_tabs::getCurrentMode().unwrapOrDefault() == "sculptor") {			
 			grid->addElement(CCMenuItemSpriteExtra::create(CCSprite::create("return.png"_spr), this, menu_selector(SculptorPanel::onReturnButton)));			
 		}
 		else {
@@ -237,6 +246,8 @@ namespace Sculptor {
 						return ButtonSprite::create("Paste Shape");
 					case 2:
 						return ButtonSprite::create("Paste Both");
+					default: 
+						return ButtonSprite::create("Unknown");
 				}
 			},
 			[](int i) {

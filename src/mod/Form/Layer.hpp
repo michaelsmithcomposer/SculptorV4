@@ -115,7 +115,7 @@ namespace Sculptor {
 		};
 
 		SolidLayer* clone() override { return new SolidLayer; }
-		void evaluate();
+		void evaluate() override;
 		std::vector<Property*> getTypeProperties() override {
 			return { &IDPool, &colorPool, &pathOffset };
 		}
@@ -133,7 +133,7 @@ namespace Sculptor {
 		};
 
 		OutlineLayer* clone() override { return new OutlineLayer; }
-		void evaluate();
+		void evaluate() override;
 		std::vector<Property*> getTypeProperties() override {
 			return { &colorPool, &pathOffset, &lineWidth };
 		}
@@ -153,7 +153,7 @@ namespace Sculptor {
 		};
 
 		GlowLayer* clone() override { return new GlowLayer; }
-		void evaluate();
+		void evaluate() override;
 		std::vector<Property*> getTypeProperties() override {
 			return { &colorPool, &pathOffset, &glowWidth };
 		}
@@ -173,7 +173,7 @@ namespace Sculptor {
 		};
 
 		UniformObjectLayer* clone() override { return new UniformObjectLayer; }
-		void evaluate();
+		void evaluate() override;
 		std::vector<Property*> getTypeProperties() override {
 			return { &IDPool, &colorPool, &pathOffset, &spacing };
 		}	
@@ -194,7 +194,7 @@ namespace Sculptor {
 		};
 
 		ChainLayer* clone() override { return new ChainLayer; }
-		void evaluate();
+		void evaluate() override;
 		std::vector<Property*> getTypeProperties() override {
 			return { &IDPool, &colorPool, &pathOffset };
 		}			
@@ -212,7 +212,7 @@ namespace Sculptor {
 		};
 
 		StripLayer* clone() override { return new StripLayer; }
-		void evaluate();
+		void evaluate() override;
 		std::vector<Property*> getTypeProperties() override {
 			return { &IDPool, &colorPool, &stripAngle, &stripScale, &pathOffset };
 		}

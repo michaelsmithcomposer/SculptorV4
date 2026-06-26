@@ -2,7 +2,7 @@
 #include "lib/Utilities.hpp"
 #include "mod/Manager.hpp"
 #include "external/validObjectIDs.hpp"
-#include "External/spriteConnections.h"
+#include "external/spriteConnections.h"
 
 using namespace geode::prelude;
 
@@ -111,11 +111,11 @@ namespace Sculptor {
 	}
 
 	CCPoint toEditorSpace(CCPoint point) {
-		return Manager::get()->getBatchLayer()->convertToNodeSpace(point);
+		return LevelEditorLayer::get()->m_objectLayer->convertToNodeSpace(point);
 	}
 
 	CCPoint fromEditorSpace(CCPoint point) {
-		return Manager::get()->getBatchLayer()->convertToWorldSpace(point);
+		return LevelEditorLayer::get()->m_objectLayer->convertToWorldSpace(point);
 	}
 
 	float roundTo(float value, int places) {

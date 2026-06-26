@@ -53,8 +53,6 @@ namespace Sculptor {
 
 		bool shouldSelectObject(GameObject* object);
 
-		CCNode* getBatchLayer();
-
 		float time = 0.f;
 
 		bool showPaths = true;

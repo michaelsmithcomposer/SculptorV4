@@ -329,6 +329,8 @@ namespace Sculptor {
 				return curve[0];
 			}
 		}
+
+		return {0, 0};
 	}
 
 	float BezierCurve::curvature() const {

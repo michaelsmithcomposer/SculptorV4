@@ -30,10 +30,7 @@ namespace Sculptor {
         PropertyInput* baseEditor;
         PropertyInput* modEditor;  
 
-        void onExit() {
-            delete baseValue;
-            delete modValue;
-        }
+        void onExit();
 
     };
 

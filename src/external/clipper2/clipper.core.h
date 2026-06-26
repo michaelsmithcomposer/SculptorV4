@@ -756,32 +756,46 @@ namespace Clipper2Lib
     const auto c = pt2.y - pt1.y;
     const auto d = pt3.x - pt2.x;
 
-#if (defined(__clang__) || defined(__GNUC__)) && UINTPTR_MAX >= UINT64_MAX
-    const auto ab = static_cast<__int128_t>(a) * static_cast<__int128_t>(b);
-    const auto cd = static_cast<__int128_t>(c) * static_cast<__int128_t>(d);
-    if (ab > cd) return 1;
-    else if (ab < cd) return -1;
-    else return 0;
-#else
-    const auto ab = MultiplyUInt64(std::abs(a), std::abs(b));
-    const auto cd = MultiplyUInt64(std::abs(c), std::abs(d));
-
-    const auto sign_ab = TriSign(a) * TriSign(b);
-    const auto sign_cd = TriSign(c) * TriSign(d);
-
-    if (sign_ab == sign_cd)
+    if constexpr (std::is_floating_point_v<T>)
     {
-      int result;
-      if (ab.hi == cd.hi)
-      {
-        if (ab.lo == cd.lo) return 0;
-        result = (ab.lo > cd.lo) ? 1 : -1;
-      }
-      else result = (ab.hi > cd.hi) ? 1 : -1;
-      return (sign_ab > 0) ? result : -result;
+      const auto cp = a * b - c * d;
+      return (cp > 0) - (cp < 0);
     }
-    return (sign_ab > sign_cd) ? 1 : -1;
-#endif
+#if (defined(__clang__) || defined(__GNUC__)) && UINTPTR_MAX >= UINT64_MAX
+    else
+    {
+      const auto ab = static_cast<__int128_t>(a) * static_cast<__int128_t>(b);
+      const auto cd = static_cast<__int128_t>(c) * static_cast<__int128_t>(d);
+      return (ab > cd) - (ab < cd);
+    }
+#else
+    else
+    {
+      const auto ab = MultiplyUInt64(std::abs(a), std::abs(b));
+      const auto cd = MultiplyUInt64(std::abs(c), std::abs(d));
+
+      const auto sign_ab = TriSign(a) * TriSign(b);
+      const auto sign_cd = TriSign(c) * TriSign(d);
+
+      if (sign_ab == sign_cd)
+      {
+        int result;
+        if (ab.hi == cd.hi)
+        {
+          if (ab.lo == cd.lo) return 0;
+          result = (ab.lo > cd.lo) ? 1 : -1;
+        }
+        else
+        {
+          result = (ab.hi > cd.hi) ? 1 : -1;
+        }
+
+        return (sign_ab > 0) ? result : -result;
+      }
+
+      return (sign_ab > sign_cd) ? 1 : -1;
+    }
+  #endif
   }
 
   template <typename T>

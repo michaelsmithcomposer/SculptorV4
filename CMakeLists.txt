@@ -32,9 +32,3 @@ endif()
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
 
 setup_geode_mod(${PROJECT_NAME})
-
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy
-        $<TARGET_PDB_FILE:${PROJECT_NAME}>
-        "C:/Program Files (x86)/Steam/steamapps/common/Geometry Dash/geode/unzipped/michael.sculptorv4/"
-)

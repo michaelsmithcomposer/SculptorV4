@@ -1,5 +1,7 @@
 #include <Geode/Geode.hpp>
+#include <Geode/binding/CCMenuItemSpriteExtra.hpp>
 #include "lib/Grid.hpp"
+#include "Geode/platform/windows.hpp"
 
 using namespace geode::prelude;
 
@@ -53,12 +55,21 @@ namespace Sculptor {
 	void Grid::addElement(CCNode* element, bool scale) {
 		if (scale) {
 			if (direction == Direction::Horizontal) {
-				element->setScale((node->getContentHeight() / lanes.size()) / element->getContentHeight());
+				float scaleVal = (node->getContentHeight() / lanes.size()) / element->getContentHeight();
+				element->setScale(scaleVal);
+				if (auto button = typeinfo_cast<CCMenuItemSpriteExtra*>(element)) {
+					button->m_baseScale = scaleVal;
+				}
 			}
 			else {
-				element->setScale((node->getContentWidth() / lanes.size()) / element->getContentWidth());
+				float scaleVal = (node->getContentWidth() / lanes.size()) / element->getContentWidth();
+				element->setScale(scaleVal);
+				if (auto button = typeinfo_cast<CCMenuItemSpriteExtra*>(element)) {
+					button->m_baseScale = scaleVal;
+				}
 			}
 		}
+
 		auto lane = lanes[count % lanes.size()];
 		lane->addChild(element);
 		lane->updateLayout();
@@ -80,7 +91,11 @@ namespace Sculptor {
 		}
 		for (auto& element : elements) {
 			if (scale) {
-				element->setScale(std::min(w / element->getContentWidth(), h / element->getContentHeight()));
+				float scaleVal = std::min(w / element->getContentWidth(), h / element->getContentHeight());
+				element->setScale(scaleVal);
+				if (auto button = typeinfo_cast<CCMenuItemSpriteExtra*>(element)) {
+					button->m_baseScale = scaleVal;
+				}
 			}
 			addElement(element, false);
 		}

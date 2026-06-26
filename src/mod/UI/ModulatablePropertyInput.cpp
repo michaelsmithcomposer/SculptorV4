@@ -1,6 +1,4 @@
-#pragma once
-
-#include <Geode/Geode.hpp>"
+#include <Geode/Geode.hpp>
 #include "mod/UI/ModulatablePropertyInput.hpp"
 #include "mod/Property.hpp"
 #include "mod/UI/PropertyInput.hpp"
@@ -84,6 +82,11 @@ namespace Sculptor {
         for (const auto& [i, color] : colors) {
             static_cast<CCFontSprite*>(label->getChildByIndex(i))->setColor(color);
         }
+    }
+
+    void ModulatablePropertyInput::onExit() {
+        delete baseValue;
+        delete modValue;
     }
 
 }

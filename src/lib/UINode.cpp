@@ -9,7 +9,7 @@ namespace Sculptor {
 	void UINode::setup(CCPoint position, Type type, bool canDrag) {
 
 		scheduleUpdate();
-		CCDirector::sharedDirector()->getTouchDispatcher()->addTargetedDelegate(this, 0, true);
+		setTouchEnabled(true);
 		mouseListener = MouseInputEvent().listen([this](MouseInputData data) { return this->handleMouseData(data); });
 
 		setContentSize({ 11, 11 });
@@ -17,12 +17,10 @@ namespace Sculptor {
 		setType(type);
 
 		this->canDrag = canDrag;
-
 	}
 
-	void UINode::onExit() {
-		CCDirector::sharedDirector()->getTouchDispatcher()->removeDelegate(this);
-		CCLayer::onExit();
+	void UINode::registerWithTouchDispatcher() {
+		CCTouchDispatcher::get()->addTargetedDelegate(this, kCCMenuHandlerPriority, true);
 	}
 
 	void UINode::setType(Type type) {
@@ -94,16 +92,4 @@ namespace Sculptor {
 
 		return true;
 	}
-
-
-
-
-
-
-
-
-
-
-
-
 }

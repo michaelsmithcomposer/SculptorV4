@@ -89,7 +89,7 @@ namespace Sculptor {
 		clear();
 		if (nodes.size() <= 1) return;
 
-		float scale = 1 / Manager::get()->getBatchLayer()->getScale();
+		float scale = 1 / LevelEditorLayer::get()->m_objectLayer->getScale();
 		
 
 		if (showControlPath) {

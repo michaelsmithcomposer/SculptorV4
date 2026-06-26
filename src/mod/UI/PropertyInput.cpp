@@ -1,5 +1,3 @@
-#pragma once
-
 #include <Geode/Geode.hpp>
 #include "mod/UI/PropertyInput.hpp"
 #include "mod/Property.hpp"
