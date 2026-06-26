@@ -1,7 +1,5 @@
 #include <Geode/Geode.hpp>
-#include <Geode/binding/CCMenuItemSpriteExtra.hpp>
 #include "lib/Grid.hpp"
-#include "Geode/platform/windows.hpp"
 
 using namespace geode::prelude;
 

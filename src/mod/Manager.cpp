@@ -1,5 +1,4 @@
 #include <Geode/Geode.hpp>
-#include <Geode/binding/LevelEditorLayer.hpp>
 #include <alphalaneous.level-storage-api/include/LevelStorageAPI.hpp>
 #include <ranges>
 #include "mod/Manager.hpp"
