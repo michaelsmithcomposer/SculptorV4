@@ -289,7 +289,7 @@ geode::Result<Form*> matjson::Serialize<Form*>::fromJson(const matjson::Value& v
 
 matjson::Value matjson::Serialize<Manager*>::toJson(const Manager* manager) {
 
-	int ID = LevelEditorLayer::get()->getNextFreeGroupID({});
+	int ID = LevelEditorLayer::get()->getNextFreeGroupID(gd::unordered_set<int>{});
 	std::vector<matjson::Value> forms;
 	for (const auto& form : manager->forms) {
 		forms.push_back(matjson::Serialize<Form*>::toJson(form));				
