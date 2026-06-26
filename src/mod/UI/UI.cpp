@@ -331,29 +331,36 @@ namespace Sculptor {
 		if (!Manager::get()->selectedLayer) return;
 		{
 			std::vector<CCNode*> elements;
-			for (const auto& [i, layer] : std::views::enumerate(Manager::get()->selectedForm->layers)) {
-				auto button = CCMenuItemSpriteExtra::create(CCSprite::create(layer->spritePath.c_str()), this, menu_selector(LayersPanel::onSelectLayerButton));
+			auto layers = Manager::get()->selectedForm->layers;
+
+			for (std::size_t i = 0; i < layers.size(); ++i) {
+				const auto& layer = layers[i];
+
+				auto button = CCMenuItemSpriteExtra::create(
+					CCSprite::create(layer->spritePath.c_str()),
+					this,
+					menu_selector(LayersPanel::onSelectLayerButton)
+				);
+
 				button->setTag(i);
+
 				if (layer == Manager::get()->selectedLayer) {
 					auto deleteSprite = CCSprite::create("delete_circle.png"_spr);
-					deleteSprite->setScale(0.5);
-					auto copySprite = CCSprite::create("copy_circle.png"_spr);
-					copySprite->setScale(0.5);
+					deleteSprite->setScale(0.5f);
 
-					elements.push_back(UI::createNodeBadges(button, { 
-						{ CCMenuItemSpriteExtra::create(deleteSprite, this, menu_selector(LayersPanel::onDeleteLayerButton)), Anchor::TopRight, {-5, -5} }, 
-						{ CCMenuItemSpriteExtra::create(copySprite, this, menu_selector(LayersPanel::onCopyLayerButton)), Anchor::BottomRight, {-5, 5} } }));
-				}
-				else {
+					auto copySprite = CCSprite::create("copy_circle.png"_spr);
+					copySprite->setScale(0.5f);
+
+					elements.push_back(UI::createNodeBadges(button, {
+						{ CCMenuItemSpriteExtra::create(deleteSprite, this, menu_selector(LayersPanel::onDeleteLayerButton)), Anchor::TopRight, {-5, -5} },
+						{ CCMenuItemSpriteExtra::create(copySprite, this, menu_selector(LayersPanel::onCopyLayerButton)), Anchor::BottomRight, {-5, 5} }
+					}));
+				} else {
 					elements.push_back(button);
-				}		
+				}
 			}
 			mainGrid->addElements(elements);
 		}
-
-		
-
-		
 	}
 
 	void LayersPanel::onNewLayerButton(CCObject* sender) {		
@@ -460,21 +467,41 @@ namespace Sculptor {
 					elements.push_back(property->createUI(size));
 				}
 				break;
-			case LayerTab::Offset:				
-				for (const auto& [i, property] : std::views::enumerate(layer->getBaseProperties())) {				
+			case LayerTab::Offset: {		
+				std::size_t i = 0;
+				for (const auto& property : layer->getBaseProperties()) {
 					elements.push_back(property->createUI(UI::elementSize));
+					++i;
 				}
 				break;
-			case LayerTab::Group:
-				for (const auto& [i, property] : std::views::enumerate(layer->groups)) {
+			}
+			case LayerTab::Group: {
+				auto& groups = layer->groups;
+
+				for (std::size_t i = 0; i < groups.size(); ++i) {
+					const auto& property = groups[i];
+
 					auto sprite = CCSprite::create("delete.png"_spr);
-					sprite->setScale(0.5);
-					auto button = CCMenuItemSpriteExtra::create(sprite, this, menu_selector(LayerPropertiesPanel::onDeleteGroupButton));
+					sprite->setScale(0.5f);
+
+					auto button = CCMenuItemSpriteExtra::create(
+						sprite,
+						this,
+						menu_selector(LayerPropertiesPanel::onDeleteGroupButton)
+					);
+
 					button->setTag(i);
-					elements.push_back(UI::createNodeBadges(property->createUI(UI::elementSize), { { button, Anchor::TopRight, {-5, -5 } } }));
+
+					elements.push_back(
+						UI::createNodeBadges(
+							property->createUI(UI::elementSize),
+							{ { button, Anchor::TopRight, {-5, -5} } }
+						)
+					);
 				}
 				elements.push_back(CCMenuItemSpriteExtra::create(CCSprite::create("create.png"_spr), this, menu_selector(LayerPropertiesPanel::onNewGroupButton)));
 				break;
+			}
 		}
 
 		grid->addElements(elements);
@@ -540,28 +567,36 @@ namespace Sculptor {
 		if (!Manager::get()->selectedModulator) return;
 		{
 			std::vector<CCNode*> elements;
-			for (const auto& [i, modulator] : std::views::enumerate(Manager::get()->selectedForm->modulators)) {
-				auto button = CCMenuItemSpriteExtra::create(CCSprite::create(modulator->spritePath.c_str()), this, menu_selector(ModulatorsPanel::onSelectModulatorButton));
+			auto& modulators = Manager::get()->selectedForm->modulators;
+
+			for (std::size_t i = 0; i < modulators.size(); ++i) {
+				const auto& modulator = modulators[i];
+
+				auto button = CCMenuItemSpriteExtra::create(
+					CCSprite::create(modulator->spritePath.c_str()),
+					this,
+					menu_selector(ModulatorsPanel::onSelectModulatorButton)
+				);
+
 				button->setTag(i);
+
 				if (modulator == Manager::get()->selectedModulator) {
 					auto deleteSprite = CCSprite::create("delete_circle.png"_spr);
-					deleteSprite->setScale(0.5);
+					deleteSprite->setScale(0.5f);
+
 					auto copySprite = CCSprite::create("copy_circle.png"_spr);
-					copySprite->setScale(0.5);
+					copySprite->setScale(0.5f);
 
 					elements.push_back(UI::createNodeBadges(button, {
 						{ CCMenuItemSpriteExtra::create(deleteSprite, this, menu_selector(ModulatorsPanel::onDeleteModulatorButton)), Anchor::TopRight, {-5, -5} },
-						{ CCMenuItemSpriteExtra::create(copySprite, this, menu_selector(ModulatorsPanel::onCopyModulatorButton)), Anchor::BottomRight, {-5, 5} } }));
-				}
-				else {
+						{ CCMenuItemSpriteExtra::create(copySprite, this, menu_selector(ModulatorsPanel::onCopyModulatorButton)), Anchor::BottomRight, {-5, 5} }
+					}));
+				} else {
 					elements.push_back(button);
 				}
 			}
 			mainGrid->addElements(elements);
 		}
-	
-
-		
 	}
 
 	void ModulatorsPanel::onNewModulatorButton(CCObject* sender) {		

@@ -437,7 +437,7 @@ namespace Sculptor {
 				editor->startDragAll();
 			}
 		});
-		controlNodes.insert(controlNodes.begin() + index.value_or(controlNodes.size()), newNode);
+		controlNodes.insert(controlNodes.begin() + (index.has_value() ? index.value() : controlNodes.size()), newNode);
 		return newNode;
 	}
 
@@ -457,7 +457,7 @@ namespace Sculptor {
 				controlNode->startDrag();
 			}
 		}
-		for (int i = index.value_or(controlNodes.size()); i < controlNodes.size(); i++) {
+		for (int i = (index.has_value() ? index.value() : controlNodes.size()); i < controlNodes.size(); i++) {
 			controlNodes[i]->startDrag();
 		}
 	}
