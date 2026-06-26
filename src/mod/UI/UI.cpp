@@ -69,7 +69,7 @@ namespace Sculptor {
 				float scaleMult = pageSize.width / (winSize.width / scale);
 
 				page->setPosition(tab->getContentSize() / 2);
-				page->setScale(std::min(1.f, scale / scaleMult));
+				page->setScale(std::min(scale, scale / scaleMult));
 				tab->addChild(page);
 			}
 			else {
