@@ -54,6 +54,7 @@ namespace Sculptor {
 			page = CCNode::create();
 			page->setID("page"_spr);
 			page->setContentSize(pageSize);
+			page->setAnchorPoint({ 0.5f, 0.f });
 
 			columns = CCNode::create();
 			columns->setContentSize(pageSize);
@@ -61,14 +62,13 @@ namespace Sculptor {
 			page->addChild(columns);
 
 			if (tab) {
-				page->setAnchorPoint({ 0.f, 0.f });
-				page->setPositionX(-96);
+				page->setPositionX(tab->getContentWidth() / 2);
+				page->setScale(EditorUI::get()->m_toolbarHeight / 92);
 				tab->addChild(page);
 			}
 			else {
-				tabBar->addChild(page);
-				page->setAnchorPoint({ 0.5f, 0.f });
 				page->setPositionX(tabBar->getContentWidth() / 2);
+				tabBar->addChild(page);
 			}
 		}	
 
