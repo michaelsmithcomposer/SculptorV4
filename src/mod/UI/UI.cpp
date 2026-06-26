@@ -66,16 +66,16 @@ namespace Sculptor {
 
 			if (tab) {
 				float scale = EditorUI::get()->m_toolbarHeight / 92;
-				float scaleMult = std::min(1.f, pageSize.width / (winSize.width / scale));
+				float scaleMult = pageSize.width / (winSize.width / scale);
 
 				page->setPosition(tab->getContentSize() / 2);
-				page->setScale(scale / scaleMult);
+				page->setScale(std::min(1.f, scale / scaleMult));
 				tab->addChild(page);
 			}
 			else {
-				float scaleMult = std::min(1.f, pageSize.width / (winSize.width / tabBar->getScale()));
+				float scaleMult = pageSize.width / (winSize.width / tabBar->getScale());
 				page->setPosition(tabBar->getContentSize() / 2);
-				page->setScale(1 / scaleMult);
+				page->setScale(std::min(1.f, 1 / scaleMult));
 				tabBar->addChild(page);
 			}
 		}	
