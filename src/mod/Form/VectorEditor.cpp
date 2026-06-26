@@ -81,6 +81,7 @@ namespace Sculptor {
 			}
 			mouseNode->setPosition(projection);
 		}
+		mouseNode->setScale(1 / LevelEditorLayer::get()->m_objectLayer->getScale());
 
 		redraw();
 	}

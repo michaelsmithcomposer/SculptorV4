@@ -58,6 +58,8 @@ namespace Sculptor {
 			if (onMove && (position != lastPosition)) onMove(this, position);
 		}
 		lastPosition = position;
+
+		sprite->setScale((getContentHeight() / sprite->getContentHeight()) / LevelEditorLayer::get()->m_objectLayer->getScale());
 	}
 
 	ListenerResult UINode::handleMouseData(MouseInputData data) {
