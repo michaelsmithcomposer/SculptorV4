@@ -90,7 +90,7 @@ geode::Result<Property*> matjson::Serialize<Property*>::fromJson(const matjson::
 		
 	}
 
-	Property* prop = new Property{ {
+	Property* prop = Property::create( {
 		.label = label,
 		.isModulatable = isModulatable,
 		.defaultValue = defaultValue,
@@ -101,7 +101,7 @@ geode::Result<Property*> matjson::Serialize<Property*>::fromJson(const matjson::
 		.max = max,
 		.valuePool = valuePool,
 		.poolType = static_cast<PoolType>(poolType)
-	}, baseValue, modValues};
+	}, baseValue, modValues);
 
 	return geode::Ok(prop);
 }
@@ -212,7 +212,7 @@ geode::Result<VectorEditor*> matjson::Serialize<VectorEditor*>::fromJson(const m
 
 	for (const auto& node : value["nodes"]) {
 		GEODE_UNWRAP_INTO(CCPoint position, node["position"].as<CCPoint>());
-		auto newNode = new TreeNode(position, editor);
+		auto newNode = TreeNode::create(position, editor);
 		nodes.push_back(newNode);
 	}
 

@@ -51,6 +51,8 @@ namespace Sculptor {
 	}
 
 	void Grid::addElement(CCNode* element, bool scale) {
+		if (!element) return;
+
 		if (scale) {
 			if (direction == Direction::Horizontal) {
 				float scaleVal = (node->getContentHeight() / lanes.size()) / element->getContentHeight();
@@ -76,6 +78,7 @@ namespace Sculptor {
 	}
 
 	void Grid::addElements(std::vector<CCNode*> elements, bool scale) {
+		if (!node) return;
 
 		int perLane = std::ceil(static_cast<float>(elements.size()) / lanes.size());
 		float w, h;
@@ -88,6 +91,7 @@ namespace Sculptor {
 			h = node->getContentHeight() / perLane;
 		}
 		for (auto& element : elements) {
+			if (!element) continue;
 			if (scale) {
 				float scaleVal = std::min(w / element->getContentWidth(), h / element->getContentHeight());
 				element->setScale(scaleVal);

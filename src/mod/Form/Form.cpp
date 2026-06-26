@@ -22,12 +22,6 @@ namespace Sculptor {
 	}
 
 	void Form::onExit() {	
-		for (auto& modulator : modulators) {
-			delete modulator;
-		}
-		for (auto& layer : layers) {
-			delete layer;
-		}		
 		CCNode::onExit();
 	}
 
@@ -46,17 +40,17 @@ namespace Sculptor {
 		
 		form->registerVectorEditor(VectorEditor::createDefault({0, 0}));
 	
-		auto a = new TreeNode(ccp(0, 60), form->vectorEditor, form->vectorEditor->root);
-		auto b = new TreeNode(ccp(60, 60), form->vectorEditor, a);
-		auto c = new TreeNode(ccp(60, 0), form->vectorEditor, b);
+		auto a = TreeNode::create(ccp(0, 60), form->vectorEditor, form->vectorEditor->root);
+		auto b = TreeNode::create(ccp(60, 60), form->vectorEditor, a);
+		auto c = TreeNode::create(ccp(60, 0), form->vectorEditor, b);
 		if (form->mode == FormMode::Closed) {
 			form->vectorEditor->root->setNewParent(c);
 		}				
 
-		auto layer = new SolidLayer;
+		auto layer = SolidLayer::create();
 		form->registerLayer(layer);		
 
-		auto modulator = new NoiseModulator;
+		auto modulator = NoiseModulator::create();
 		form->registerModulator(modulator);
 
 		Manager::get()->selectForm(form);
@@ -98,7 +92,6 @@ namespace Sculptor {
 		if (deleteObjects) layer->deleteObjects();
 		std::erase(layers, layer);	
 		if (Manager::get()->selectedLayer == layer) Manager::get()->selectedLayer = nullptr;
-		delete layer;
 		UI::get()->updateUI();		
 	}
 
@@ -106,7 +99,6 @@ namespace Sculptor {
 		for (auto& layer : layers) {
 			if (deleteObjects) layer->deleteObjects();			
 			if (Manager::get()->selectedLayer == layer) Manager::get()->selectedLayer = nullptr;
-			delete layer;
 		}		
 		layers.clear();
 		UI::get()->updateUI();
@@ -120,7 +112,6 @@ namespace Sculptor {
 		}
 		std::erase(modulators, modulator);
 		if (Manager::get()->selectedModulator == modulator) Manager::get()->selectedModulator = nullptr;
-		delete modulator;
 		UI::get()->updateUI();
 	}	
 
@@ -132,7 +123,6 @@ namespace Sculptor {
 				}
 			}			
 			if (Manager::get()->selectedModulator == modulator) Manager::get()->selectedModulator = nullptr;
-			delete modulator;
 		}
 		modulators.clear();
 		UI::get()->updateUI();
@@ -205,5 +195,27 @@ namespace Sculptor {
 		vectorEditor->redraw();
 	}
 
+	int Form::getModulatorID(Modulator* modulator) {
+		int index = 0;
+		for (const auto& current : modulators) {
+			if (current == modulator) {
+				return index;
+			}
+			++index;
+		}
 
+		return -1;
+	}
+	
+	int Form::getLayerID(Layer* layer) {
+		int index = 0;
+		for (const auto& current : layers) {
+			if (current == layer) {
+				return index;
+			}
+			++index;
+		}
+
+		return -1;
+	}
 }

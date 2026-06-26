@@ -10,7 +10,7 @@ namespace Sculptor {
 	class ModulationContext;
 	
 
-	class Property {
+	class Property : public CCObject {
 	public:
 	
 		struct Info {
@@ -26,6 +26,12 @@ namespace Sculptor {
 			std::vector<float> valuePool;
 			PoolType poolType = PoolType::None;
 		};
+
+		static Property* create(Info info, std::optional<float> value = std::nullopt, std::optional<std::unordered_map<Modulator*, float>> modValues = std::nullopt) {
+			auto ret = new Property(info, value, modValues);
+			ret->autorelease();
+			return ret;
+		}
 
 		Property(Info info, std::optional<float> value = std::nullopt, std::optional<std::unordered_map<Modulator*, float>> modValues = std::nullopt) : 
 			info(resolveInfo(info)), 

@@ -61,7 +61,7 @@ namespace Sculptor {
 
 	private:
 
-		void update(float dt);
+		void update(float dt) override;
 
 	};
 

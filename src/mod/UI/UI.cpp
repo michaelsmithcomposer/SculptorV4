@@ -8,14 +8,14 @@
 #include "mod/Form/VectorEditor.hpp"
 #include "mod/Form/Form.hpp"
 #include "mod/Serialization.hpp"
+#include <alphalaneous.tinker/include/UIScaling.hpp>
 
 using namespace geode::prelude;
 
 namespace Sculptor {
 
 	void UI::setup() {		
-		instance = this;	
-
+		instance = this;
 		mouseListener = MouseInputEvent().listen([this](MouseInputData data) { return this->handleMouseData(data); });
 
 		sculptorPanel = SculptorPanel::create();
@@ -45,14 +45,17 @@ namespace Sculptor {
 
 	void UI::createTab() {
 		{
-			auto tabBar = EditorUI::get()->getChildByIDRecursive("sculptor-tab-bar"_spr);
-			if (!tabBar) return;
+			auto editor = EditorUI::get();
+
+			auto tabBarRes = alpha::editor_tabs::nodeForTab("sculptor"_spr);
+			if (!tabBarRes) return;
+
+			auto tabBar = tabBarRes.unwrap();
+			float scale = editor->m_toolbarHeight / 92;
 
 			auto winSize = CCDirector::get()->getWinSize();
 
-			tabBar->setPositionX(winSize.width / 2);
-
-			tab = tabBar->getChildByType<BoomScrollLayer>(0);
+			tabBar->setContentSize({winSize.width, editor->m_toolbarHeight});
 
 			page = CCNode::create();
 			page->setID("page"_spr);
@@ -64,20 +67,36 @@ namespace Sculptor {
 			columns->setLayout(RowLayout::create()->setGap(0)->setAxisAlignment(AxisAlignment::Start)->setAutoScale(false)->setCrossAxisOverflow(false));
 			page->addChild(columns);
 
-			if (tab) {
-				float scale = EditorUI::get()->m_toolbarHeight / 92;
-				float scaleMult = pageSize.width / (winSize.width / scale);
+			float scaleMult = pageSize.width / (winSize.width / scale);
 
-				page->setPosition(tab->getContentSize() / 2);
-				page->setScale(std::min(scale, scale / scaleMult));
-				tab->addChild(page);
-			}
-			else {
-				float scaleMult = pageSize.width / (winSize.width / tabBar->getScale());
-				page->setPosition(tabBar->getContentSize() / 2);
-				page->setScale(std::min(1.f, 1 / scaleMult));
-				tabBar->addChild(page);
-			}
+			page->setScale(std::min(1.f, scaleMult));
+			page->setPosition(tabBar->getContentSize() / 2);
+			tabBar->addChild(page);
+
+			tabBar->addEventListener(tinker::api::ui_scaling::UIScaleUpdated(), [this] (float scale, bool scaleToolbars, bool topAlign) {
+				if (scaleToolbars) {
+					auto editor = EditorUI::get();
+					if (!editor) return;
+
+					auto tabBarRes = alpha::editor_tabs::nodeForTab("sculptor"_spr);
+					if (!tabBarRes) return;
+
+					auto tabBar = tabBarRes.unwrap();
+
+					auto winSize = CCDirector::get()->getWinSize();
+
+					tabBar->setContentSize({winSize.width, editor->m_toolbarHeight});
+
+					float scaleMult = pageSize.width / (winSize.width / scale);
+
+					page->setScale(std::min(1.f, scaleMult));
+					page->setPosition(tabBar->getContentSize() / 2);
+
+					if (tabBar->isVisible()) {
+						UI::get()->setGameUIVisible(false);
+					}
+				}
+			});
 		}	
 
 		formSettingsPanel = FormSettingsPanel::create();
@@ -154,6 +173,8 @@ namespace Sculptor {
 
 		grid = Grid::create(size, Direction::Horizontal, 1, 3);		
 		addChildAtPosition(grid, Anchor::Center);
+		setContentSize(grid->getContentSize());
+		setAnchorPoint({0.f, 0.5f});
 
 		auto winSize = CCDirector::get()->getWinSize();
 
@@ -161,8 +182,29 @@ namespace Sculptor {
 		editorUI->m_uiItems->addObject(this);
 		editorUI->addChild(this);
 
-		setPosition(50, winSize.height / 2 + editorUI->m_toolbarHeight / 2 + 33.5f);
-		setScale(0.6);
+		auto scale = editorUI->m_toolbarHeight / 92;
+
+		auto pos = CCPoint{50 * scale, winSize.height / 2 + editorUI->m_toolbarHeight / 2 + (33.5f * scale)};
+		auto playbackMenu = editorUI->getChildByID("playback-menu");
+		if (playbackMenu) {
+			auto bb = playbackMenu->boundingBox();
+			pos = CCPoint{bb.getMinX() + (50 * scale), playbackMenu->getPositionY()};
+		}
+
+		setPosition(pos);
+		setScale(0.6 * scale);
+
+		addEventListener(tinker::api::ui_scaling::UIScaleUpdated(), [this, winSize, editorUI] (float scale, bool scaleToolbars, bool topAlign) {
+			auto pos = CCPoint{50 * scale, winSize.height / 2 + editorUI->m_toolbarHeight / 2 + (33.5f * scale)};
+			auto playbackMenu = editorUI->getChildByID("playback-menu");
+			if (playbackMenu) {
+				auto bb = playbackMenu->boundingBox();
+				pos = CCPoint{bb.getMinX() + (50 * scale), playbackMenu->getPositionY()};
+			}
+			
+			setPosition(pos);
+			setScale(0.6 * scale);
+		});
 	}
 
 	void SculptorPanel::updateUI() {
@@ -516,7 +558,6 @@ namespace Sculptor {
 		auto layer = Manager::get()->selectedLayer;
 		auto property = layer->groups[sender->getTag()];
 		std::erase(layer->groups, property);
-		delete property;
 		UI::get()->updateUI();
 	}
 

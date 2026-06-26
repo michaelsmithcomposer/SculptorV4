@@ -16,7 +16,6 @@ namespace Sculptor {
 		info = result->info;
 		baseValue = result->baseValue;
 		modValues = result->modValues;
-		delete result;
 	}
 
 	float Property::evaluate(const ModulationContext& context) {

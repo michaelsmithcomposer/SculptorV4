@@ -20,6 +20,10 @@
 		"alphalaneous.level-storage-api": {
 			"version": ">=v1.0.2",
 			"required": true
+		},
+		"alphalaneous.tinker": {
+			"version": ">=v1.0.20",
+			"required": false
 		}
 	},
 	"resources": {

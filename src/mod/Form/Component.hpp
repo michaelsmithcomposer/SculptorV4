@@ -8,7 +8,7 @@ namespace Sculptor {
 
 	class Form;
 
-	struct Component {	
+	struct Component : public CCNode {	
 
 		virtual ~Component() = default;
 

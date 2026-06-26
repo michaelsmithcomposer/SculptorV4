@@ -10,14 +10,14 @@ using namespace geode::prelude;
 
 namespace Sculptor {
 
-	std::vector<Layer*> Layer::prototypes() {
-		static std::vector<Layer*> instance = {	
-			new SolidLayer,
-			new OutlineLayer,
-			new GlowLayer,
-			new UniformObjectLayer,
-			new StripLayer,
-			new ChainLayer,			
+	std::vector<Ref<Layer>> Layer::prototypes() {
+		static std::vector<Ref<Layer>> instance = {	
+			SolidLayer::create(),
+			OutlineLayer::create(),
+			GlowLayer::create(),
+			UniformObjectLayer::create(),
+			StripLayer::create(),
+			ChainLayer::create(),			
 		};
 		return instance;
 	}
@@ -76,7 +76,7 @@ namespace Sculptor {
 	}
 
 	Property* Layer::addGroupProperty() {
-		auto property = new Property{ {.label = "Group", .filter = CommonFilter::Int, .min = 0} };
+		auto property = Property::create( {.label = "Group", .filter = CommonFilter::Int, .min = 0} );
 		groups.push_back(property);
 		return property;
 	}
@@ -85,9 +85,9 @@ namespace Sculptor {
 		objectIndex = 0;
 		objectCount = objects.size();
 
-		paths = form->getPaths(pathOffset.evaluate({}));
-		decomposition = form->getDecomposition(pathOffset.evaluate({}));
-		triangulation = form->getTriangulation(pathOffset.evaluate({}));
+		paths = form->getPaths(pathOffset->evaluate({}));
+		decomposition = form->getDecomposition(pathOffset->evaluate({}));
+		triangulation = form->getTriangulation(pathOffset->evaluate({}));
 
 		updateNeedsContext();
 		updateBounds();
@@ -147,23 +147,23 @@ namespace Sculptor {
 		}	
 
 		return ObjectState{
-			.ID = static_cast<int>(ID.evaluate(context)),
-			.x = x.evaluate(context) + form->getPositionX(),
-			.y = y.evaluate(context) + form->getPositionY(),
-			.rotation = rotation.evaluate(context),
-			.rotationX = rotationX.evaluate(context),
-			.rotationY = rotationY.evaluate(context),
-			.scale = scale.evaluate(context),
-			.scaleX = scaleX.evaluate(context),
-			.scaleY = scaleY.evaluate(context),
-			.zLayer = static_cast<int>(zLayer.evaluate(context)),
-			.zOrder = static_cast<int>(zOrder.evaluate(context)),
-			.editorLayer = static_cast<int>(editorLayer.evaluate(context)),
-			.color = static_cast<int>(color.evaluate(context)),
-			.secondaryColor = static_cast<int>(secondaryColor.evaluate(context)),
-			.hue = hue.evaluate(context),
-			.saturation = saturation.evaluate(context),
-			.value = value.evaluate(context),			
+			.ID = static_cast<int>(ID->evaluate(context)),
+			.x = x->evaluate(context) + form->getPositionX(),
+			.y = y->evaluate(context) + form->getPositionY(),
+			.rotation = rotation->evaluate(context),
+			.rotationX = rotationX->evaluate(context),
+			.rotationY = rotationY->evaluate(context),
+			.scale = scale->evaluate(context),
+			.scaleX = scaleX->evaluate(context),
+			.scaleY = scaleY->evaluate(context),
+			.zLayer = static_cast<int>(zLayer->evaluate(context)),
+			.zOrder = static_cast<int>(zOrder->evaluate(context)),
+			.editorLayer = static_cast<int>(editorLayer->evaluate(context)),
+			.color = static_cast<int>(color->evaluate(context)),
+			.secondaryColor = static_cast<int>(secondaryColor->evaluate(context)),
+			.hue = hue->evaluate(context),
+			.saturation = saturation->evaluate(context),
+			.value = value->evaluate(context),			
 			.absoluteBrightness = true,
 			.absoluteSaturation = true,
 			.groups = groupIDs
@@ -177,8 +177,8 @@ namespace Sculptor {
 		for (const auto& triangle : triangulation) {
 			buildObject({}, [&](auto context) { 
 				auto object = ObjectState::fromTriangle(triangle); 
-				object.ID = (int)IDPool.evaluate(context);
-				object.color = (int)colorPool.evaluate(context);
+				object.ID = (int)IDPool->evaluate(context);
+				object.color = (int)colorPool->evaluate(context);
 				return object;
 			});
 		}
@@ -188,9 +188,9 @@ namespace Sculptor {
 		for (const auto& sequence : paths) {
 			for (const auto& edge : sequence.edges()) {
 				buildObject({ .edge = &edge, .sequence = &sequence }, [&](auto context) {									
-					auto object = ObjectState::fromLine(edge, lineWidth.evaluate(context));
+					auto object = ObjectState::fromLine(edge, lineWidth->evaluate(context));
 					object.ID = objectIDs[GDObject::Line];
-					object.color = (int)colorPool.evaluate(context);
+					object.color = (int)colorPool->evaluate(context);
 					return object;
 				});
 			}
@@ -198,10 +198,10 @@ namespace Sculptor {
 		for (const auto& sequence : paths) {
 			for (const auto& point : sequence.points()) {
 				buildObject({ .sequence = &sequence }, [&](auto context) {				
-					float r = lineWidth.evaluate(context) * 0.5;
+					float r = lineWidth->evaluate(context) * 0.5;
 					auto object = ObjectState::fromCircle(Circle({ point, r}));
 					object.ID = objectIDs[GDObject::UnitCircle];
-					object.color = (int)colorPool.evaluate(context);
+					object.color = (int)colorPool->evaluate(context);
 					return object;
 				});
 			}
@@ -217,15 +217,15 @@ namespace Sculptor {
 					.y = edge.a().y,					
 				};
 
-				float scale = glowWidth.evaluate({ &dummyObject });
+				float scale = glowWidth->evaluate({ &dummyObject });
 
 				buildObject({ .edge = &edge, .sequence = &sequence }, [&](auto context) {
 					return ObjectState{
 						.ID = objectIDs[GDObject::QuarterGlow],
 						.x = edge.a().x,
 						.y = edge.a().y,
-						.scale = glowWidth.evaluate({}),
-						.color = (int)colorPool.evaluate(context)
+						.scale = glowWidth->evaluate({}),
+						.color = (int)colorPool->evaluate(context)
 					};
 				});
 
@@ -234,7 +234,7 @@ namespace Sculptor {
 
 				if (edge.length() > scale * (gdUnit / 2.0)) {
 					buildObject({ .edge = &edge, .sequence = &sequence }, [&](auto context) {
-						float width = glowWidth.evaluate(context);
+						float width = glowWidth->evaluate(context);
 						CCPoint position = middle.lerp(0.5) + normal * (width * (gdUnit / 6.0));
 						return ObjectState{
 							.ID = objectIDs[GDObject::QuarterGlowLine],
@@ -243,11 +243,11 @@ namespace Sculptor {
 							.rotation = CC_RADIANS_TO_DEGREES(normal.getAngle() - (PI / 2)),
 							.scaleX = middle.length() / (gdUnit / 2),
 							.scaleY = width,
-							.color = (int)colorPool.evaluate(context)
+							.color = (int)colorPool->evaluate(context)
 						};
 					});
 					buildObject({ .edge = &edge, .sequence = &sequence }, [&](auto context) {
-						float width = glowWidth.evaluate(context);
+						float width = glowWidth->evaluate(context);
 						CCPoint position = middle.b() + normal * (width * (gdUnit / 6.0)) + fromPolar(width * (gdUnit / 6.0), normal.getAngle() + (PI / 2));
 						return ObjectState{
 							.ID = objectIDs[GDObject::QuarterGlowCorner],
@@ -255,11 +255,11 @@ namespace Sculptor {
 							.y = position.y,
 							.rotation = CC_RADIANS_TO_DEGREES(normal.getAngle() - (PI / 2)),
 							.scale = width,
-							.color = (int)colorPool.evaluate(context)
+							.color = (int)colorPool->evaluate(context)
 						};
 					});
 					buildObject({ .edge = &edge, .sequence = &sequence }, [&](auto context) {
-						float width = glowWidth.evaluate(context);
+						float width = glowWidth->evaluate(context);
 						CCPoint position = middle.a() + normal * (width * (gdUnit / 6.0)) + fromPolar(width * (gdUnit / 6.0), normal.getAngle() - (PI / 2));
 						return ObjectState{
 							.ID = objectIDs[GDObject::QuarterGlowCorner],
@@ -267,19 +267,19 @@ namespace Sculptor {
 							.y = position.y,
 							.rotation = CC_RADIANS_TO_DEGREES(normal.getAngle() + PI),
 							.scale = width,
-							.color = (int)colorPool.evaluate(context)
+							.color = (int)colorPool->evaluate(context)
 						};
 					});					
 				}
 				else if (edge.length() > scale * (gdUnit / 4.0)) {
 					buildObject({ .edge = &edge, .sequence = &sequence }, [&](auto context) {
-						float width = glowWidth.evaluate(context);						
+						float width = glowWidth->evaluate(context);						
 						return ObjectState{
 							.ID = objectIDs[GDObject::QuarterGlow],
 							.x = edge.lerp(0.5).x,
 							.y = edge.lerp(0.5).y,							
 							.scale = width,
-							.color = (int)colorPool.evaluate(context)
+							.color = (int)colorPool->evaluate(context)
 						};
 					});				
 				}
@@ -299,12 +299,12 @@ namespace Sculptor {
 
 				float s = 0.0f;
 				buildObject({ .sequence = &sequence }, [&](auto context) {					
-					s = spacing.evaluate(context);
+					s = spacing->evaluate(context);
 					return ObjectState{
-						.ID = (int)IDPool.evaluate(context), 
+						.ID = (int)IDPool->evaluate(context), 
 						.x = position.x, 
 						.y = position.y, 
-						.color = (int)colorPool.evaluate(context) 
+						.color = (int)colorPool->evaluate(context) 
 					};
 				});
 
@@ -332,7 +332,7 @@ namespace Sculptor {
 					.layer = this,
 					.sequence = &sequence,
 				};
-				int ID = (int)IDPool.evaluate(dummyContext);
+				int ID = (int)IDPool->evaluate(dummyContext);
 
 				auto [a, b] = getSpriteConnections(ID);
 				float width = a.getDistance(b);
@@ -360,7 +360,7 @@ namespace Sculptor {
 						.rotation = CC_RADIANS_TO_DEGREES(rotation),
 						.scaleX = scale,
 						.scaleY = scale,
-						.color = (int)colorPool.evaluate(context)
+						.color = (int)colorPool->evaluate(context)
 					};
 				});
 
@@ -378,7 +378,7 @@ namespace Sculptor {
 
 			auto box = poly.boundingBox();
 			auto circle = Circle::fromBoundingBox(box);
-			float angle = stripAngle.evaluate({});
+			float angle = stripAngle->evaluate({});
 
 			auto axis = Line(circle.origin + fromPolar(circle.radius, angle), circle.origin - fromPolar(circle.radius, angle));			
 
@@ -393,11 +393,11 @@ namespace Sculptor {
 					.objectState = &dummyObject,
 					.layer = this,					
 				};
-				int ID = (int)IDPool.evaluate(dummyContext);	
+				int ID = (int)IDPool->evaluate(dummyContext);	
 
 				auto sprite = objectSpriteFromID(ID);
 
-				float width = sprite->getContentWidth() * stripScale.evaluate(dummyContext);
+				float width = sprite->getContentWidth() * stripScale->evaluate(dummyContext);
 				float stripT = width / axis.length();
 				float endT = t + stripT;
 
@@ -489,7 +489,7 @@ namespace Sculptor {
 									.rotation = CC_RADIANS_TO_DEGREES(angle),
 									.scaleX = width / sprite->getContentWidth(),
 									.scaleY = bestPos.getDistance(bestNeg) / sprite->getContentHeight(),
-									.color = (int)colorPool.evaluate(context)
+									.color = (int)colorPool->evaluate(context)
 								};
 							});
 						}				

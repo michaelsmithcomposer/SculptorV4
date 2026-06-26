@@ -45,6 +45,7 @@ namespace Sculptor {
 			std::string filePath = outDir + std::to_string(id) + ".png";
 			image->saveToFile(filePath.c_str());
 
+			delete image;
 			log::info("saved {} to {}", id, filePath);
 			
 		}

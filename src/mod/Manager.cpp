@@ -37,7 +37,7 @@ namespace Sculptor {
 	void Manager::reconstruct() {
 		reconstructed = true;
 		auto data = alpha::level_storage::getSaveContainer(LevelEditorLayer::get(), Mod::get());
-		//matjson::Serialize<Manager*>::fromJson(data["manager"]);		
+		(void) matjson::Serialize<Manager*>::fromJson(data["manager"]);		
 
 		clipboard = Form::createDefault(FormMode::Closed, CCPoint{ -1000, -1000 });
 		clipboard->removeAllModulators();

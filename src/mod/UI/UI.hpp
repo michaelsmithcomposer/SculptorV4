@@ -42,22 +42,24 @@ namespace Sculptor {
 		void onModeExit();		
 
 		void setGameUIVisible(bool visible) {
-			auto categoriesMenu = EditorUI::get()->getChildByIDRecursive("toolbar-categories-menu");
+			auto editorUI = EditorUI::get();
+
+			auto categoriesMenu = editorUI->getChildByIDRecursive("toolbar-categories-menu");
 			if (categoriesMenu) {
 				categoriesMenu->setVisible(visible);
 			}
 
-			auto togglesMenu = EditorUI::get()->getChildByIDRecursive("toolbar-toggles-menu");
+			auto togglesMenu = editorUI->getChildByIDRecursive("toolbar-toggles-menu");
 			if (togglesMenu) {
 				togglesMenu->setVisible(visible);
 			}
 
-			auto spacerLineLeft = EditorUI::get()->getChildByIDRecursive("spacer-line-left");
+			auto spacerLineLeft = editorUI->getChildByIDRecursive("spacer-line-left");
 			if (spacerLineLeft) {
 				spacerLineLeft->setVisible(visible);
 			}
 
-			auto spacerLineRight = EditorUI::get()->getChildByIDRecursive("spacer-line-right");
+			auto spacerLineRight = editorUI->getChildByIDRecursive("spacer-line-right");
 			if (spacerLineRight) {
 				spacerLineRight->setVisible(visible);
 			}
