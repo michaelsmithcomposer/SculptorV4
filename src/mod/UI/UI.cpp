@@ -22,7 +22,7 @@ namespace Sculptor {
 		sculptorPanel = SculptorPanel::create();
 
 		alpha::editor_tabs::addModeSwitchCallback([this](auto id) {
-			if (id != "sculptor") {
+			if (id != "sculptor"_spr) {
 				onModeExit();
 			}
 		});
@@ -156,7 +156,7 @@ namespace Sculptor {
 
 		grid->clear();		
 
-		if (alpha::editor_tabs::getCurrentMode().unwrapOrDefault() == "sculptor") {			
+		if (alpha::editor_tabs::getCurrentMode().unwrapOrDefault() == "sculptor"_spr) {			
 			grid->addElement(CCMenuItemSpriteExtra::create(CCSprite::create("return.png"_spr), this, menu_selector(SculptorPanel::onReturnButton)));			
 		}
 		else {
@@ -166,7 +166,7 @@ namespace Sculptor {
 	}
 
 	void SculptorPanel::onModeButton(CCObject* sender) {		
-		alpha::editor_tabs::switchMode("sculptor");
+		alpha::editor_tabs::switchMode("sculptor"_spr);
 		UI::get()->onModeEnter();
 	}
 

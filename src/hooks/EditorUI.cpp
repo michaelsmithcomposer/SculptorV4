@@ -13,7 +13,7 @@ class $modify(SculptorEditorUI, EditorUI) {
 	bool init(LevelEditorLayer * layer) {
 		if (!EditorUI::init(layer)) return false;
 
-		alpha::editor_tabs::addTab("sculptor"_spr, "sculptor", [this] {
+		alpha::editor_tabs::addTab("sculptor"_spr, "sculptor"_spr, [this] {
 
 			std::vector<Ref<CCNode>> nodes;
 			auto root = CCNode::create();
