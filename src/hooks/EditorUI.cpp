@@ -15,7 +15,9 @@ class $modify(SculptorEditorUI, EditorUI) {
 
 		alpha::editor_tabs::addTab("sculptor"_spr, "sculptor"_spr, 
 			[] {
-				return CCNode::create();
+				auto node = CCNode::create();
+				node->setUserFlag("alphalaneous.tinker/disable-editor-scroll");
+				return node;
 			}, 
 			[] { 
 				return CCNode::create(); 
