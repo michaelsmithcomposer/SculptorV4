@@ -13,7 +13,18 @@ class $modify(SculptorEditorUI, EditorUI) {
 	bool init(LevelEditorLayer * layer) {
 		if (!EditorUI::init(layer)) return false;
 
-		alpha::editor_tabs::addTab("sculptor"_spr, "sculptor", [this] {
+		alpha::editor_tabs::addTab("sculptor"_spr, "sculptor"_spr,
+			[] {
+				auto node = CCNode::create();
+				node->setUserFlag("alphalaneous.tinker/disable-editor-scroll");
+				return node;
+			},
+			[] {
+				return CCNode::create();
+			}
+		);
+
+	/*	alpha::editor_tabs::addTab("sculptor"_spr, "sculptor", [this] {
 
 			std::vector<Ref<CCNode>> nodes;
 			auto root = CCNode::create();
@@ -27,7 +38,7 @@ class $modify(SculptorEditorUI, EditorUI) {
 				}, [](int rows, int cols, auto tab) {});
 
 		
-			return true;
+			return true;*/
 	}
 
 	void selectObject(GameObject* object, bool ignoreFilter) {		

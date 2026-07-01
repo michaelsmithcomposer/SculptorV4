@@ -22,7 +22,7 @@ namespace Sculptor {
 		sculptorPanel = SculptorPanel::create();
 
 		alpha::editor_tabs::addModeSwitchCallback([this](auto id) {
-			if (id != "sculptor") {
+			if (id != "sculptor"_spr) {
 				onModeExit();
 			}
 		});
@@ -46,13 +46,13 @@ namespace Sculptor {
 
 	void UI::createTab() {
 		{
-			tab = EditorUI::get()->getChildByIDRecursive("sculptor-tab-bar"_spr)->getChildByType<BoomScrollLayer>(0);
+			tab = EditorUI::get()->getChildByIDRecursive("sculptor-tab-bar"_spr)->getChildByType<BoomScrollLayer>(0);		
 
 			page = CCNode::create();
 			page->setID("page"_spr);
 			page->setAnchorPoint({ 0.f, 0.f });
 			page->setPositionX(-96);
-			page->setContentSize(pageSize);
+			page->setContentSize(pageSize);		
 
 			columns = CCNode::create();
 			columns->setContentSize(pageSize);
@@ -147,7 +147,7 @@ namespace Sculptor {
 
 		grid->clear();		
 
-		if (alpha::editor_tabs::getCurrentMode().unwrap() == "sculptor") {			
+		if (alpha::editor_tabs::getCurrentMode().unwrap() == "sculptor"_spr) {			
 			grid->addElement(CCMenuItemSpriteExtra::create(CCSprite::create("return.png"_spr), this, menu_selector(SculptorPanel::onReturnButton)));			
 		}
 		else {
@@ -157,7 +157,7 @@ namespace Sculptor {
 	}
 
 	void SculptorPanel::onModeButton(CCObject* sender) {		
-		alpha::editor_tabs::switchMode("sculptor");
+		alpha::editor_tabs::switchMode("sculptor"_spr);
 		UI::get()->onModeEnter();
 	}
 

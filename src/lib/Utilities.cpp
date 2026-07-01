@@ -2,7 +2,7 @@
 #include "lib/Utilities.hpp"
 #include "mod/Manager.hpp"
 #include "external/validObjectIDs.hpp"
-#include "External/spriteConnections.h"
+#include "external/spriteConnections.h"
 
 using namespace geode::prelude;
 

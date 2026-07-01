@@ -3,7 +3,7 @@
 #include "mod/Property.hpp"
 #include "mod/UI/ModulatablePropertyInput.hpp"
 #include "mod/UI/UI.hpp"
-#include "External/validObjectIDs.hpp"
+#include "external/validObjectIDs.hpp"
 
 using namespace geode::prelude;
 

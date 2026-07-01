@@ -1,5 +1,3 @@
-#pragma once
-
 #include <Geode/Geode.hpp>
 #include "mod/Serialization.hpp"
 #include "mod/Property.hpp"
