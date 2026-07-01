@@ -24,14 +24,14 @@ namespace Sculptor {
 		}
 	}
 
-	std::vector<Modulator*> Modulator::prototypes() {
-		static std::vector<Modulator*> instance = {
-			new NoiseModulator,
-			new XModulator,
-			new YModulator,
-			new SineModulator,
-			new NormalModulator,
-			new IndexModulator,
+	std::vector<Ref<Modulator>> Modulator::prototypes() {
+		static std::vector<Ref<Modulator>> instance = {
+			NoiseModulator::create(),
+			XModulator::create(),
+			YModulator::create(),
+			SineModulator::create(),
+			NormalModulator::create(),
+			IndexModulator::create(),
 		};
 		return instance;
 	}
@@ -43,12 +43,12 @@ namespace Sculptor {
 	float Modulator::evaluate(const ModulationContext& context) {
 		float value = sample(context);
 
-		float r = ramp.evaluate({});
+		float r = ramp->evaluate({});
 		float exp = r > 0 ? 1 + r : 1 / (1 - r);
 
 		value = pow(abs(value), exp) * sign(value);
-		value *= depth.evaluate({});
-		value += offset.evaluate({});
+		value *= depth->evaluate({});
+		value += offset->evaluate({});
 		//value = wrap(value, rangeMin.evaluate({}), rangeMax.evaluate({}));
 
 		return value;
@@ -73,6 +73,7 @@ namespace Sculptor {
 	float NoiseModulator::sample(const ModulationContext& context) {
 		if (!context.objectState || !context.layer) return CCRANDOM_MINUS1_1();
 		if (context.layer) return noiseIndex(context.layer->objectIndex);				
+		return 0;
 	}
 
 	float XModulator::sample(const ModulationContext& context) {
@@ -90,15 +91,15 @@ namespace Sculptor {
 	float SineModulator::sample(const ModulationContext& context) {
 		if (!context.objectState) return 0;
 		
-		float dx = cos(angle.evaluate({}));
-		float dy = sin(angle.evaluate({}));
+		float dx = cos(angle->evaluate({}));
+		float dy = sin(angle->evaluate({}));
 
 		float length = abs(context.layer->bounds.size.width * dx) + abs(context.layer->bounds.size.height * dy);
 
 		float projection = (context.objectState->x - context.layer->bounds.origin.x) * dx + 
 						   (context.objectState->y - context.layer->bounds.origin.y) * dy;
 
-		return sin((projection / length) * (frequency.evaluate({}) * TAU) + phase.evaluate({}));
+		return sin((projection / length) * (frequency->evaluate({}) * TAU) + phase->evaluate({}));
 	}
 
 	float NormalModulator::sample(const ModulationContext& context) {

@@ -2,13 +2,12 @@
 
 #include <Geode/Geode.hpp>
 #include "lib/Utilities.hpp"
-
+#include "mod/Property.hpp"
 
 using namespace geode::prelude;
 
 namespace Sculptor {
 
-    class Property;
     class PropertyInput;
    
     class ModulatablePropertyInput : public SculptorNode<ModulatablePropertyInput> {
@@ -21,19 +20,16 @@ namespace Sculptor {
 
     private:
 
-        Property* property;
-        Property* baseValue;
-        Property* modValue;
+        Ref<Property> property;
+        Ref<Property> baseValue;
+        Ref<Property> modValue;
 
         NineSlice* base;
         CCLabelBMFont* label = CCLabelBMFont::create("", "chatFont.fnt");
         PropertyInput* baseEditor;
         PropertyInput* modEditor;  
 
-        void onExit() {
-            delete baseValue;
-            delete modValue;
-        }
+        void onExit();
 
     };
 

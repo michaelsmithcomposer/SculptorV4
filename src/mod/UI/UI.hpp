@@ -42,11 +42,29 @@ namespace Sculptor {
 		void onModeExit();		
 
 		void setGameUIVisible(bool visible) {
-			EditorUI::get()->getChildByIDRecursive("toolbar-categories-menu")->setVisible(visible);
-			EditorUI::get()->getChildByIDRecursive("toolbar-toggles-menu")->setVisible(visible);
-			EditorUI::get()->getChildByIDRecursive("spacer-line-left")->setVisible(visible);
-			EditorUI::get()->getChildByIDRecursive("spacer-line-right")->setVisible(visible);
+			auto editorUI = EditorUI::get();
+
+			auto categoriesMenu = editorUI->getChildByIDRecursive("toolbar-categories-menu");
+			if (categoriesMenu) {
+				categoriesMenu->setVisible(visible);
+			}
+
+			auto togglesMenu = editorUI->getChildByIDRecursive("toolbar-toggles-menu");
+			if (togglesMenu) {
+				togglesMenu->setVisible(visible);
+			}
+
+			auto spacerLineLeft = editorUI->getChildByIDRecursive("spacer-line-left");
+			if (spacerLineLeft) {
+				spacerLineLeft->setVisible(visible);
+			}
+
+			auto spacerLineRight = editorUI->getChildByIDRecursive("spacer-line-right");
+			if (spacerLineRight) {
+				spacerLineRight->setVisible(visible);
+			}
 		}
+		
 		bool inTab() {
 			return alpha::editor_tabs::getCurrentTab().unwrapOrDefault() == "sculptor"_spr;
 		}

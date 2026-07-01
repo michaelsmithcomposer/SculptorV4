@@ -10,7 +10,7 @@ namespace Sculptor {
 	class ModulationContext;
 	
 
-	class Property {
+	class Property : public CCObject {
 	public:
 	
 		struct Info {
@@ -27,10 +27,16 @@ namespace Sculptor {
 			PoolType poolType = PoolType::None;
 		};
 
+		static Property* create(Info info, std::optional<float> value = std::nullopt, std::optional<std::unordered_map<Modulator*, float>> modValues = std::nullopt) {
+			auto ret = new Property(info, value, modValues);
+			ret->autorelease();
+			return ret;
+		}
+
 		Property(Info info, std::optional<float> value = std::nullopt, std::optional<std::unordered_map<Modulator*, float>> modValues = std::nullopt) : 
 			info(resolveInfo(info)), 
-			baseValue(value.value_or(info.defaultValue)), 
-			modValues(modValues.value_or({})) {};
+			baseValue(value.has_value() ? value.value() : info.defaultValue), 
+			modValues(modValues.has_value() ? modValues.value() : std::unordered_map<Modulator*, float>{}) {};
 
 		void setFromJson(const matjson::Value& value);
 

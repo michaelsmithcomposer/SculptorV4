@@ -13,7 +13,8 @@ struct SculptorLevelEditorLayer : Modify<SculptorLevelEditorLayer, LevelEditorLa
 		if (!LevelEditorLayer::init(level, noUI)) return false;	
 		
 		Manager* manager = Manager::create();
-		this->addChild(manager);
+		manager->setZOrder(10000);
+		this->m_objectLayer->addChild(manager);
 
 		
 

@@ -1,5 +1,3 @@
-#pragma once
-
 #include <Geode/Geode.hpp>
 #include "mod/Serialization.hpp"
 #include "mod/Property.hpp"
@@ -92,7 +90,7 @@ geode::Result<Property*> matjson::Serialize<Property*>::fromJson(const matjson::
 		
 	}
 
-	Property* prop = new Property{ {
+	Property* prop = Property::create( {
 		.label = label,
 		.isModulatable = isModulatable,
 		.defaultValue = defaultValue,
@@ -103,7 +101,7 @@ geode::Result<Property*> matjson::Serialize<Property*>::fromJson(const matjson::
 		.max = max,
 		.valuePool = valuePool,
 		.poolType = static_cast<PoolType>(poolType)
-	}, baseValue, modValues};
+	}, baseValue, modValues);
 
 	return geode::Ok(prop);
 }
@@ -214,7 +212,7 @@ geode::Result<VectorEditor*> matjson::Serialize<VectorEditor*>::fromJson(const m
 
 	for (const auto& node : value["nodes"]) {
 		GEODE_UNWRAP_INTO(CCPoint position, node["position"].as<CCPoint>());
-		auto newNode = new TreeNode(position, editor);
+		auto newNode = TreeNode::create(position, editor);
 		nodes.push_back(newNode);
 	}
 
@@ -291,7 +289,7 @@ geode::Result<Form*> matjson::Serialize<Form*>::fromJson(const matjson::Value& v
 
 matjson::Value matjson::Serialize<Manager*>::toJson(const Manager* manager) {
 
-	int ID = LevelEditorLayer::get()->getNextFreeGroupID({});
+	int ID = LevelEditorLayer::get()->getNextFreeGroupID(gd::unordered_set<int>{});
 	std::vector<matjson::Value> forms;
 	for (const auto& form : manager->forms) {
 		forms.push_back(matjson::Serialize<Form*>::toJson(form));				

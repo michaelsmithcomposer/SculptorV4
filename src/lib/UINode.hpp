@@ -18,8 +18,7 @@ namespace Sculptor {
 		Type type;
 
 		void setup(CCPoint position, Type type, bool canDrag = true);
-		void onExit();
-
+    	void registerWithTouchDispatcher(void);
 		void setType(Type type);
 
 		void setMoveCallback(std::function<void(UINode*, CCPoint)> callback) { onMove = callback; }

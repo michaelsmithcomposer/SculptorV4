@@ -1,5 +1,3 @@
-#pragma once
-
 #include <Geode/Geode.hpp>
 #include "mod/UI/PropertyInput.hpp"
 #include "mod/Property.hpp"
@@ -66,7 +64,7 @@ namespace Sculptor {
         if (property->info.filter == CommonFilter::Float) {
             count++;
         }
-        auto str = padding + std::format("{:0{}.{}f}", value, count, property->info.trailingDigits);
+        auto str = padding + fmt::format("{:0{}.{}f}", value, count, property->info.trailingDigits);
         valueInput->setString(str);
         auto text = valueInput->getChildByType<CCTextInputNode>(0)->getChildByType<CCLabelBMFont>(0);
         if (value == 0) {

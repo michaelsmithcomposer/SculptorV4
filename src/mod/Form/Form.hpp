@@ -24,8 +24,8 @@ namespace Sculptor {
 		FormMode mode;
 
 		VectorEditor* vectorEditor;
-		std::vector<Layer*> layers;
-		std::vector<Modulator*> modulators;
+		std::vector<Ref<Layer>> layers;
+		std::vector<Ref<Modulator>> modulators;
 
 		Property quality{ { .label = "Quality", .isModulatable = false, .defaultValue = 1, .min = 0.1, .max = 3  } };
 
@@ -53,13 +53,8 @@ namespace Sculptor {
 		void onSelect();
 		void onDeselect();
 
-
-		int getModulatorID(Modulator* modulator) {
-			return std::ranges::find(modulators, modulator) - modulators.begin();
-		}
-		int getLayerID(Layer* layer) {
-			return std::ranges::find(layers, layer) - layers.begin();
-		}
+		int getModulatorID(Modulator* modulator);
+		int getLayerID(Layer* layer);
 
 		CCDrawNode* debug;
 

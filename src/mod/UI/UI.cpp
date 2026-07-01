@@ -8,21 +8,20 @@
 #include "mod/Form/VectorEditor.hpp"
 #include "mod/Form/Form.hpp"
 #include "mod/Serialization.hpp"
+#include <alphalaneous.tinker/include/UIScaling.hpp>
 
 using namespace geode::prelude;
 
 namespace Sculptor {
 
-
 	void UI::setup() {		
-		instance = this;	
-
+		instance = this;
 		mouseListener = MouseInputEvent().listen([this](MouseInputData data) { return this->handleMouseData(data); });
 
 		sculptorPanel = SculptorPanel::create();
 
 		alpha::editor_tabs::addModeSwitchCallback([this](auto id) {
-			if (id != "sculptor") {
+			if (id != "sculptor"_spr) {
 				onModeExit();
 			}
 		});
@@ -46,21 +45,58 @@ namespace Sculptor {
 
 	void UI::createTab() {
 		{
-			tab = EditorUI::get()->getChildByIDRecursive("sculptor-tab-bar"_spr)->getChildByType<BoomScrollLayer>(0);
+			auto editor = EditorUI::get();
+
+			auto tabBarRes = alpha::editor_tabs::nodeForTab("sculptor"_spr);
+			if (!tabBarRes) return;
+
+			auto tabBar = tabBarRes.unwrap();
+			float scale = editor->m_toolbarHeight / 92;
+
+			auto winSize = CCDirector::get()->getWinSize();
+
+			tabBar->setContentSize({winSize.width, editor->m_toolbarHeight});
 
 			page = CCNode::create();
 			page->setID("page"_spr);
-			page->setAnchorPoint({ 0.f, 0.f });
-			page->setPositionX(-96);
 			page->setContentSize(pageSize);
+			page->setAnchorPoint({ 0.5f, 0.5f });
 
 			columns = CCNode::create();
 			columns->setContentSize(pageSize);
 			columns->setLayout(RowLayout::create()->setGap(0)->setAxisAlignment(AxisAlignment::Start)->setAutoScale(false)->setCrossAxisOverflow(false));
 			page->addChild(columns);
 
+			float scaleMult = pageSize.width / (winSize.width / scale);
 
-			tab->addChild(page);
+			page->setScale(std::min(1.f, scaleMult));
+			page->setPosition(tabBar->getContentSize() / 2);
+			tabBar->addChild(page);
+
+			tabBar->addEventListener(tinker::api::ui_scaling::UIScaleUpdated(), [this] (float scale, bool scaleToolbars, bool topAlign) {
+				if (scaleToolbars) {
+					auto editor = EditorUI::get();
+					if (!editor) return;
+
+					auto tabBarRes = alpha::editor_tabs::nodeForTab("sculptor"_spr);
+					if (!tabBarRes) return;
+
+					auto tabBar = tabBarRes.unwrap();
+
+					auto winSize = CCDirector::get()->getWinSize();
+
+					tabBar->setContentSize({winSize.width, editor->m_toolbarHeight});
+
+					float scaleMult = pageSize.width / (winSize.width / scale);
+
+					page->setScale(std::min(1.f, scaleMult));
+					page->setPosition(tabBar->getContentSize() / 2);
+
+					if (tabBar->isVisible()) {
+						UI::get()->setGameUIVisible(false);
+					}
+				}
+			});
 		}	
 
 		formSettingsPanel = FormSettingsPanel::create();
@@ -137,17 +173,45 @@ namespace Sculptor {
 
 		grid = Grid::create(size, Direction::Horizontal, 1, 3);		
 		addChildAtPosition(grid, Anchor::Center);
+		setContentSize(grid->getContentSize());
+		setAnchorPoint({0.f, 0.5f});
 
-		EditorUI::get()->addChild(this);
-		setPosition(60, 240);
-		setScale(0.6);
+		auto winSize = CCDirector::get()->getWinSize();
+
+		auto editorUI = EditorUI::get();
+		editorUI->m_uiItems->addObject(this);
+		editorUI->addChild(this);
+
+		auto scale = editorUI->m_toolbarHeight / 92;
+
+		auto pos = CCPoint{50 * scale, winSize.height / 2 + editorUI->m_toolbarHeight / 2 + (33.5f * scale)};
+		auto playbackMenu = editorUI->getChildByID("playback-menu");
+		if (playbackMenu) {
+			auto bb = playbackMenu->boundingBox();
+			pos = CCPoint{bb.getMinX() + (50 * scale), playbackMenu->getPositionY()};
+		}
+
+		setPosition(pos);
+		setScale(0.6 * scale);
+
+		addEventListener(tinker::api::ui_scaling::UIScaleUpdated(), [this, winSize, editorUI] (float scale, bool scaleToolbars, bool topAlign) {
+			auto pos = CCPoint{50 * scale, winSize.height / 2 + editorUI->m_toolbarHeight / 2 + (33.5f * scale)};
+			auto playbackMenu = editorUI->getChildByID("playback-menu");
+			if (playbackMenu) {
+				auto bb = playbackMenu->boundingBox();
+				pos = CCPoint{bb.getMinX() + (50 * scale), playbackMenu->getPositionY()};
+			}
+			
+			setPosition(pos);
+			setScale(0.6 * scale);
+		});
 	}
 
 	void SculptorPanel::updateUI() {
 
 		grid->clear();		
 
-		if (alpha::editor_tabs::getCurrentMode().unwrap() == "sculptor") {			
+		if (alpha::editor_tabs::getCurrentMode().unwrapOrDefault() == "sculptor"_spr) {			
 			grid->addElement(CCMenuItemSpriteExtra::create(CCSprite::create("return.png"_spr), this, menu_selector(SculptorPanel::onReturnButton)));			
 		}
 		else {
@@ -157,7 +221,7 @@ namespace Sculptor {
 	}
 
 	void SculptorPanel::onModeButton(CCObject* sender) {		
-		alpha::editor_tabs::switchMode("sculptor");
+		alpha::editor_tabs::switchMode("sculptor"_spr);
 		UI::get()->onModeEnter();
 	}
 
@@ -237,6 +301,8 @@ namespace Sculptor {
 						return ButtonSprite::create("Paste Shape");
 					case 2:
 						return ButtonSprite::create("Paste Both");
+					default: 
+						return ButtonSprite::create("Unknown");
 				}
 			},
 			[](int i) {
@@ -307,29 +373,36 @@ namespace Sculptor {
 		if (!Manager::get()->selectedLayer) return;
 		{
 			std::vector<CCNode*> elements;
-			for (const auto& [i, layer] : std::views::enumerate(Manager::get()->selectedForm->layers)) {
-				auto button = CCMenuItemSpriteExtra::create(CCSprite::create(layer->spritePath.c_str()), this, menu_selector(LayersPanel::onSelectLayerButton));
+			auto layers = Manager::get()->selectedForm->layers;
+
+			for (std::size_t i = 0; i < layers.size(); ++i) {
+				const auto& layer = layers[i];
+
+				auto button = CCMenuItemSpriteExtra::create(
+					CCSprite::create(layer->spritePath.c_str()),
+					this,
+					menu_selector(LayersPanel::onSelectLayerButton)
+				);
+
 				button->setTag(i);
+
 				if (layer == Manager::get()->selectedLayer) {
 					auto deleteSprite = CCSprite::create("delete_circle.png"_spr);
-					deleteSprite->setScale(0.5);
-					auto copySprite = CCSprite::create("copy_circle.png"_spr);
-					copySprite->setScale(0.5);
+					deleteSprite->setScale(0.5f);
 
-					elements.push_back(UI::createNodeBadges(button, { 
-						{ CCMenuItemSpriteExtra::create(deleteSprite, this, menu_selector(LayersPanel::onDeleteLayerButton)), Anchor::TopRight, {-5, -5} }, 
-						{ CCMenuItemSpriteExtra::create(copySprite, this, menu_selector(LayersPanel::onCopyLayerButton)), Anchor::BottomRight, {-5, 5} } }));
-				}
-				else {
+					auto copySprite = CCSprite::create("copy_circle.png"_spr);
+					copySprite->setScale(0.5f);
+
+					elements.push_back(UI::createNodeBadges(button, {
+						{ CCMenuItemSpriteExtra::create(deleteSprite, this, menu_selector(LayersPanel::onDeleteLayerButton)), Anchor::TopRight, {-5, -5} },
+						{ CCMenuItemSpriteExtra::create(copySprite, this, menu_selector(LayersPanel::onCopyLayerButton)), Anchor::BottomRight, {-5, 5} }
+					}));
+				} else {
 					elements.push_back(button);
-				}		
+				}
 			}
 			mainGrid->addElements(elements);
 		}
-
-		
-
-		
 	}
 
 	void LayersPanel::onNewLayerButton(CCObject* sender) {		
@@ -436,21 +509,41 @@ namespace Sculptor {
 					elements.push_back(property->createUI(size));
 				}
 				break;
-			case LayerTab::Offset:				
-				for (const auto& [i, property] : std::views::enumerate(layer->getBaseProperties())) {				
+			case LayerTab::Offset: {		
+				std::size_t i = 0;
+				for (const auto& property : layer->getBaseProperties()) {
 					elements.push_back(property->createUI(UI::elementSize));
+					++i;
 				}
 				break;
-			case LayerTab::Group:
-				for (const auto& [i, property] : std::views::enumerate(layer->groups)) {
+			}
+			case LayerTab::Group: {
+				auto& groups = layer->groups;
+
+				for (std::size_t i = 0; i < groups.size(); ++i) {
+					const auto& property = groups[i];
+
 					auto sprite = CCSprite::create("delete.png"_spr);
-					sprite->setScale(0.5);
-					auto button = CCMenuItemSpriteExtra::create(sprite, this, menu_selector(LayerPropertiesPanel::onDeleteGroupButton));
+					sprite->setScale(0.5f);
+
+					auto button = CCMenuItemSpriteExtra::create(
+						sprite,
+						this,
+						menu_selector(LayerPropertiesPanel::onDeleteGroupButton)
+					);
+
 					button->setTag(i);
-					elements.push_back(UI::createNodeBadges(property->createUI(UI::elementSize), { { button, Anchor::TopRight, {-5, -5 } } }));
+
+					elements.push_back(
+						UI::createNodeBadges(
+							property->createUI(UI::elementSize),
+							{ { button, Anchor::TopRight, {-5, -5} } }
+						)
+					);
 				}
 				elements.push_back(CCMenuItemSpriteExtra::create(CCSprite::create("create.png"_spr), this, menu_selector(LayerPropertiesPanel::onNewGroupButton)));
 				break;
+			}
 		}
 
 		grid->addElements(elements);
@@ -465,7 +558,6 @@ namespace Sculptor {
 		auto layer = Manager::get()->selectedLayer;
 		auto property = layer->groups[sender->getTag()];
 		std::erase(layer->groups, property);
-		delete property;
 		UI::get()->updateUI();
 	}
 
@@ -516,28 +608,36 @@ namespace Sculptor {
 		if (!Manager::get()->selectedModulator) return;
 		{
 			std::vector<CCNode*> elements;
-			for (const auto& [i, modulator] : std::views::enumerate(Manager::get()->selectedForm->modulators)) {
-				auto button = CCMenuItemSpriteExtra::create(CCSprite::create(modulator->spritePath.c_str()), this, menu_selector(ModulatorsPanel::onSelectModulatorButton));
+			auto& modulators = Manager::get()->selectedForm->modulators;
+
+			for (std::size_t i = 0; i < modulators.size(); ++i) {
+				const auto& modulator = modulators[i];
+
+				auto button = CCMenuItemSpriteExtra::create(
+					CCSprite::create(modulator->spritePath.c_str()),
+					this,
+					menu_selector(ModulatorsPanel::onSelectModulatorButton)
+				);
+
 				button->setTag(i);
+
 				if (modulator == Manager::get()->selectedModulator) {
 					auto deleteSprite = CCSprite::create("delete_circle.png"_spr);
-					deleteSprite->setScale(0.5);
+					deleteSprite->setScale(0.5f);
+
 					auto copySprite = CCSprite::create("copy_circle.png"_spr);
-					copySprite->setScale(0.5);
+					copySprite->setScale(0.5f);
 
 					elements.push_back(UI::createNodeBadges(button, {
 						{ CCMenuItemSpriteExtra::create(deleteSprite, this, menu_selector(ModulatorsPanel::onDeleteModulatorButton)), Anchor::TopRight, {-5, -5} },
-						{ CCMenuItemSpriteExtra::create(copySprite, this, menu_selector(ModulatorsPanel::onCopyModulatorButton)), Anchor::BottomRight, {-5, 5} } }));
-				}
-				else {
+						{ CCMenuItemSpriteExtra::create(copySprite, this, menu_selector(ModulatorsPanel::onCopyModulatorButton)), Anchor::BottomRight, {-5, 5} }
+					}));
+				} else {
 					elements.push_back(button);
 				}
 			}
 			mainGrid->addElements(elements);
 		}
-	
-
-		
 	}
 
 	void ModulatorsPanel::onNewModulatorButton(CCObject* sender) {		

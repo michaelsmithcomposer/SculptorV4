@@ -32,15 +32,12 @@ namespace Sculptor {
 		if (!reconstructed) {
 			reconstruct();
 		}		
-
-		formLayer->setPosition(getBatchLayer()->getPosition());
-		formLayer->setScale(getBatchLayer()->getScale());
 	}
 
 	void Manager::reconstruct() {
 		reconstructed = true;
 		auto data = alpha::level_storage::getSaveContainer(LevelEditorLayer::get(), Mod::get());
-		matjson::Serialize<Manager*>::fromJson(data["manager"]);		
+		(void) matjson::Serialize<Manager*>::fromJson(data["manager"]);		
 
 		clipboard = Form::createDefault(FormMode::Closed, CCPoint{ -1000, -1000 });
 		clipboard->removeAllModulators();
@@ -124,13 +121,4 @@ namespace Sculptor {
 		}
 		return !UI::get()->inTab();
 	}
-
-	CCNode* Manager::getBatchLayer() {
-		auto main = LevelEditorLayer::get()->getChildByID("main-node");
-		if (main) {
-			return main->getChildByID("batch-layer");
-		}		
-		return LevelEditorLayer::get()->getChildByType<ShaderLayer*>(0)->getChildByID("main-node")->getChildByID("batch-layer");
-	}
-
 }

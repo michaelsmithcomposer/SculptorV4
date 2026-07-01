@@ -4,13 +4,13 @@
 #include "lib/Utilities.hpp"
 #include "lib/Geometry2.hpp"
 #include "lib/UINode.hpp"
+#include "TreeNode.hpp"
 
 using namespace geode::prelude;
 
 namespace Sculptor {
 
 	class Form;
-
 	class TreeNode;
 
 	class VectorEditor : public SculptorNode<VectorEditor, CCDrawNode> {
@@ -20,9 +20,9 @@ namespace Sculptor {
 		static VectorEditor* createDefault(CCPoint position);		
 		void onExit();		
 
-		std::vector<TreeNode*> nodes;
+		std::vector<Ref<TreeNode>> nodes;
 		UINode* mouseNode;
-		TreeNode* root;
+		Ref<TreeNode> root;
 		Form* form;			
 		std::vector<GameObject*> proxyObjects;
 
@@ -42,9 +42,7 @@ namespace Sculptor {
 		void convertTreeNode(TreeNode* treeNode);
 		void convertBezierNode(TreeNode* treeNode, UINode* node);
 
-		int getTreeNodeID(TreeNode* node) const {
-			return std::ranges::contains(nodes, node) ? std::ranges::find(nodes, node) - nodes.begin() : -1;
-		}
+		int getTreeNodeID(TreeNode* node) const;
 
 		void startDragAll();
 		void setAllVisible(bool visible);
@@ -67,39 +65,7 @@ namespace Sculptor {
 
 		PathD getSpanningPath(TreeNode* subRoot = nullptr);
 
-		
-
 		static constexpr float visibilityRadius = 4.25;
 
 	};
-
-	class TreeNode {
-	public:
-
-		TreeNode(CCPoint position, VectorEditor* editor, TreeNode* parent = nullptr);
-
-		UINode* node;
-		std::vector<UINode*> controlNodes;
-		TreeNode* parent;
-		std::vector<TreeNode*> children;
-		VectorEditor* editor;
-
-		void setNewParent(TreeNode* newParent);
-
-		int getDegree();
-		int getDepth();
-		BezierCurve asBezierCurve();
-
-		int getControlNodeID(UINode* node) const {
-			return std::ranges::contains(controlNodes, node) ? std::ranges::find(controlNodes, node) - controlNodes.begin() : -1;
-		}
-		UINode* addControlNode(CCPoint position, UINode::Type type, std::optional<int> index = std::nullopt);
-		void clearControlNodes();		
-
-		void startDragRecursive(std::optional<int> index = std::nullopt);		
-
-	};
-
-
-
 }

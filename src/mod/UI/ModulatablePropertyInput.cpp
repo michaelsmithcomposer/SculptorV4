@@ -1,8 +1,5 @@
-#pragma once
-
-#include <Geode/Geode.hpp>"
+#include <Geode/Geode.hpp>
 #include "mod/UI/ModulatablePropertyInput.hpp"
-#include "mod/Property.hpp"
 #include "mod/UI/PropertyInput.hpp"
 #include "mod/Manager.hpp"
 #include "mod/Form/Modulator.hpp"
@@ -12,9 +9,6 @@ using namespace geode::prelude;
 namespace Sculptor {
 
     void ModulatablePropertyInput::setup(Property* property, CCSize size) {
-
-        
-
         this->property = property;
 
         this->setContentSize(size);
@@ -29,7 +23,7 @@ namespace Sculptor {
         node->setContentSize(size);
         node->setLayout(RowLayout::create()->setGap(0)->setAxisAlignment(AxisAlignment::Center));
 
-        baseValue = new Property{ {
+        baseValue = Property::create( {
             .label = "",
             .isModulatable = false,
             .defaultValue = property->getBaseValue(),
@@ -38,21 +32,21 @@ namespace Sculptor {
             .trailingDigits = property->info.trailingDigits,
             .min = property->info.min,
             .max = property->info.max
-            } };
+            } );
 
         baseValue->setCallback([this](Property* prop) { this->property->setBaseValue(prop->getBaseValue()); });
         baseEditor = static_cast<PropertyInput*>(baseValue->createUI({ size.width / 2, size.height }));
         baseEditor->setBaseVisible(false);
         node->addChild(baseEditor);
 
-        modValue = new Property{ {
+        modValue = Property::create( {
             .label = "",
             .isModulatable = false,
             .defaultValue = property->getModValue(Manager::get()->selectedModulator),
             .filter = property->info.filter,
             .leadingDigits = property->info.leadingDigits,
             .trailingDigits = property->info.trailingDigits,            
-            } };
+            } );
 
         modValue->setCallback([this](Property* prop) {
             this->property->setModValue(Manager::get()->selectedModulator, prop->getBaseValue());
@@ -84,6 +78,10 @@ namespace Sculptor {
         for (const auto& [i, color] : colors) {
             static_cast<CCFontSprite*>(label->getChildByIndex(i))->setColor(color);
         }
+    }
+
+    void ModulatablePropertyInput::onExit() {
+        CCNode::onExit();
     }
 
 }

@@ -104,8 +104,8 @@ namespace Sculptor {
 
 	Lines Sequence::computeEdges() const {
 		Lines result;
-		for (const auto& [a, b] : _points | std::views::pairwise) {
-			result.push_back(Line(a, b));
+		for (std::size_t i = 1; i < _points.size(); ++i) {
+			result.emplace_back(_points[i - 1], _points[i]);
 		}
 		return result;
 	}
@@ -129,8 +129,12 @@ namespace Sculptor {
 	const std::vector<float>& Sequence::cumulativeLengths() const {
 		if (!_cumulativeLengths) {
 			std::vector<float> result;
-			for (auto [i, edge] : std::views::enumerate(edges())) {
-				result.push_back(((i > 0) ? result[i - 1] : 0) + edge.length());
+			auto e = edges();
+
+			std::size_t i = 0;
+			for (const auto& edge : e) {
+				result.push_back((i > 0 ? result[i - 1] : 0) + edge.length());
+				++i;
 			}
 			_cumulativeLengths = result;
 		}
@@ -178,11 +182,15 @@ namespace Sculptor {
 	CCPoint Sequence::lerp(float t) const {	
 		int index = 0;
 		float target = t * length();
-		for (auto [i, l] : cumulativeLengths() | std::views::enumerate) {
+		auto lengths = cumulativeLengths();
+
+		std::size_t i = 0;
+		for (const auto& l : lengths) {
 			if (target <= l) {
 				index = i;
 				break;
 			}
+			++i;
 		}
 		Line line = Line(at(index), at((index + 1) % size()));
 		float offset = (index == 0) ? 0 : cumulativeLengths().at(index - 1);
@@ -202,19 +210,24 @@ namespace Sculptor {
 	}
 
 	bool Sequence::containsEdge(const Line& edge) const {
-		for (const auto& [i, e] : std::views::enumerate(edges())) {
+		std::size_t i = 0;
+		for (const auto& e : edges()) {
 			if (e.coincidentWith(edge)) {
 				return true;
 			}
+			++i;
 		}
 		return false;
 	}
 	std::vector<int> Sequence::edgeIndicesContaining(const CCPoint& point) const {
 		std::vector<int> result;
-		for (const auto& [i, line] : std::views::enumerate(edges())) {
+		std::size_t i = 0;
+
+		for (const auto& line : edges()) {
 			if (line.contains(point)) {
 				result.push_back(i);
 			}
+			++i;
 		}
 		return result;
 	}
@@ -223,15 +236,20 @@ namespace Sculptor {
 		float bestDistance = FLT_MAX;
 		CCPoint bestPoint;
 		int bestIndex;
-		for (const auto& [i, line] : lines | std::views::enumerate) {
+		std::size_t i = 0;
+
+		for (const auto& line : lines) {
 			CCPoint projection = line.projectionOf(point);
 			float d = projection.getDistance(point);
+
 			if (d < bestDistance) {
 				bestDistance = d;
 				bestPoint = projection;
 				bestIndex = i;
 			}
-		}	
+
+			++i;
+		}
 		return std::make_pair(lines[bestIndex], bestPoint);
 	}
 	CCPoint projectOntoLines(CCPoint point, const Lines& lines) {
@@ -329,6 +347,8 @@ namespace Sculptor {
 				return curve[0];
 			}
 		}
+
+		return {0, 0};
 	}
 
 	float BezierCurve::curvature() const {
@@ -337,8 +357,13 @@ namespace Sculptor {
 		}
 		auto e = edges();
 		float maxAngle = 0;
-		for (const auto& [i, edge] : std::views::enumerate(e | std::views::take(e.size() - 1))) {
-			float angle = acos((edge.a() - edge.b()).normalize().dot((e[i + 1].b() - e[i + 1].a()).normalize()));
+		for (std::size_t i = 0; i + 1 < e.size(); ++i) {
+			float angle = acos(
+				(e[i].a() - e[i].b()).normalize().dot(
+					(e[i + 1].b() - e[i + 1].a()).normalize()
+				)
+			);
+
 			maxAngle = std::max(maxAngle, angle);
 		}
 		return maxAngle;
